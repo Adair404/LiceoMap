@@ -1,4 +1,19 @@
+# Editores e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Android & Gradle
+.gradle/
 build/
-dist/
-nbproject/private/
+captures/
+*.apk
+*.aar
+local.properties
+
+# Logs y Bases de Datos
 *.log
+*.sqlite
+*.sql.gz
