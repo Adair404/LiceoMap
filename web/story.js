@@ -74,7 +74,7 @@ function initStory({ onScroll = () => {} } = {}) {
     function navigateTo(index, behavior = 'smooth') {
         if (!trigger || index < 0 || index >= panels.length) return false;
         window.scrollTo({
-            top: trigger.start + ((index * 2 + 1.4) / 10) * (trigger.end - trigger.start),
+            top: trigger.start + ((index * 2 + 1.4) / timeline.duration()) * (trigger.end - trigger.start),
             behavior
         });
         return true;
@@ -281,10 +281,10 @@ function initStory({ onScroll = () => {} } = {}) {
                         onScroll();
                     }
                     previousProgress = progress;
-                    const index = Math.min(4, Math.floor((timeline.time() + .08) / 2));
+                    const index = timeline.time() >= 10.5 ? -1 : Math.min(4, Math.floor((timeline.time() + .08) / 2));
                     if (index === active) return;
                     active = index;
-                    story.dataset.scene = panels[index].id;
+                    story.dataset.scene = index < 0 ? 'proyecto' : panels[index].id;
                     panels.forEach((panel, number) => {
                         panel.inert = number !== index;
                         panel.setAttribute('aria-hidden', String(number !== index));
@@ -293,6 +293,7 @@ function initStory({ onScroll = () => {} } = {}) {
                         if (number === index) control.setAttribute('aria-current', 'step');
                         else control.removeAttribute('aria-current');
                     });
+                    if (index < 0) return;
                     const label = (compact && index === 4 ? panels[1] : panels[index]).dataset.label + ' · Demostración de la app';
                     caption.textContent = label;
                     screenRole.setAttribute('aria-label', label);

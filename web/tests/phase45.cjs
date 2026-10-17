@@ -4,7 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 module.exports = async function({call,evaluate,navigate,until,screenshot,profile,web,diagnose}) {
-    if (!diagnose) {
+    if (!diagnose && process.argv.includes('--phase52-integrity')) require('./phase52-integrity.cjs');
+    if (!diagnose && process.argv.includes('--phase5-integrity') && !process.argv.includes('--phase52-integrity')) require('./phase5-integrity.cjs');
+    if (!diagnose && !process.argv.includes('--phase5-integrity') && !process.argv.includes('--phase52-integrity')) {
         const reference=JSON.parse(fs.readFileSync(path.join(web,'tests/fixtures/phase44-integrity.json'),'utf8'));
         for (const [file,expected] of Object.entries(reference.hashes)) {
             let bytes=fs.readFileSync(path.join(web,file));

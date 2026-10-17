@@ -1,4 +1,4 @@
-// Cinematic landing regression, through phase 4.5. Run: node web/tests/phase2.cjs
+// Cinematic landing regression, through phase 5. Run: node web/tests/phase2.cjs
 // Uses installed Chrome/Edge (or CHROME_PATH), Node 22+, no npm dependencies.
 // External requests are blocked: this checks local UI and offline fallbacks.
 const assert = require('node:assert/strict');
@@ -13,7 +13,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function main() {
     console.log('Checking UTF-8 and launching isolated browser...');
-    for (const name of ['index.html', 'style.css', 'app.js', 'story.js']) {
+    for (const name of ['index.html', 'style.css', 'purpose.css', 'finale.css', 'app.js', 'story.js', 'purpose.js', 'finale.js']) {
         const text = new TextDecoder('utf-8', { fatal: true }).decode(fs.readFileSync(path.join(web, name)));
         assert(!text.includes('\uFFFD'), name + ': replacement character');
     }
@@ -53,8 +53,10 @@ async function main() {
         console.log('Connecting to browser...');
         ws = new WebSocket(pages.find(page => page.type === 'page').webSocketDebuggerUrl);
         await new Promise((resolve, reject) => {
-            ws.addEventListener('open', resolve, { once: true });
-            ws.addEventListener('error', reject, { once: true });
+            const timer=setTimeout(()=>reject(Error('Chrome CDP connection timed out: '+stderr)),10000);
+            ws.addEventListener('open', () => {clearTimeout(timer);resolve();}, { once: true });
+            ws.addEventListener('error', event => {clearTimeout(timer);reject(Error('Chrome CDP connection failed: '+(event.message||'')+' '+stderr));}, { once: true });
+            ws.addEventListener('close', () => {clearTimeout(timer);reject(Error('Chrome CDP connection closed: '+stderr));}, { once: true });
         });
         let id = 0;
         const pending = new Map(), errors = [];
@@ -62,6 +64,8 @@ async function main() {
             const message = JSON.parse(data);
             if (message.id) {
                 const request = pending.get(message.id);
+                if (!request) return;
+                clearTimeout(request.timer);
                 pending.delete(message.id);
                 if (message.error) request.reject(Error(JSON.stringify(message.error)));
                 else request.resolve(message.result);
@@ -70,8 +74,13 @@ async function main() {
         });
         const call = (method, params = {}) => new Promise((resolve, reject) => {
             const next = ++id;
-            pending.set(next, { resolve, reject });
+            const timer=setTimeout(()=>{pending.delete(next);reject(Error('Chrome CDP timed out: '+method+' '+stderr));},30000);
+            pending.set(next, { resolve, reject, timer });
             ws.send(JSON.stringify({ id: next, method, params }));
+        });
+        ws.addEventListener('close', () => {
+            for (const request of pending.values()) {clearTimeout(request.timer);request.reject(Error('Chrome CDP closed: '+stderr));}
+            pending.clear();
         });
         const evaluate = async expression => {
             const result = await call('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
@@ -128,6 +137,19 @@ async function main() {
         await call('CSS.enable');
         await call('Network.enable');
         await call('Network.setBlockedURLs', { urls: ['https://*', 'http://*'] });
+        if(process.argv.includes('--phase52')) {
+            require('./phase52-integrity.cjs');
+            await require('./phase52.cjs')({call,evaluate,navigate,until,screenshot,profile,web});
+            assert.deepEqual(errors, []);
+            await call('Browser.close');
+            return;
+        }
+        if(process.argv.includes('--phase51-record') || process.argv.includes('--phase51') || process.argv.includes('--phase5')) {
+            await require('./phase51.cjs')({call,evaluate,navigate,until,screenshot,profile,web,record:process.argv.includes('--phase51-record')});
+            assert.deepEqual(errors, []);
+            await call('Browser.close');
+            return;
+        }
         if(process.argv.includes('--phase45-diagnose') || process.argv.includes('--phase45-verify')) {
             await require('./phase45.cjs')({call,evaluate,navigate,until,screenshot,profile,web,
                 diagnose:process.argv.includes('--phase45-diagnose')});
@@ -165,7 +187,7 @@ async function main() {
                 await evaluate("document.querySelector('.intro-skip').click()");
                 await evaluate("Promise.all([...document.querySelectorAll('.screen-layer')].map(image=>image.decode()))");
                 for (const [index, time] of [1,3.45,5.45,7.45,9.3].entries()) {
-                    await evaluate(`(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+${time}/10*(t.end-t.start),behavior:'instant'});})()`);
+                    await evaluate(`(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+${time}/t.animation.duration()*(t.end-t.start),behavior:'instant'});})()`);
                     await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
                     const result = await evaluate(`(() => {
                         const box=el=>el.getBoundingClientRect().toJSON();
@@ -227,8 +249,8 @@ async function main() {
                         const bottom=document.querySelector('.cinema-controls').getBoundingClientRect().top;
                         const phone=document.querySelector('.phone-story');
                         const poses=[];
-                        const progresses=[...Array.from({length:81},(_,step)=>(.1+step/80*9.8)/10),
-                            ...[2,4,6,8].flatMap(at=>[at-.22,at+.32,at+.72].map(time=>time/10))].sort((a,b)=>a-b);
+                        const progresses=[...Array.from({length:81},(_,step)=>(.1+step/80*9.8)/trigger.animation.duration()),
+                            ...[2,4,6,8].flatMap(at=>[at-.22,at+.32,at+.72].map(time=>time/trigger.animation.duration()))].sort((a,b)=>a-b);
                         for(const progress of progresses){
                             window.scrollTo({top:trigger.start+progress*(trigger.end-trigger.start),behavior:'instant'});
                             await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
@@ -284,7 +306,7 @@ async function main() {
                     motion.push({viewport:[size.width,size.height],...audit.summary});
                     assert.deepEqual(audit.failures,[],'Transition clipping at '+size.width+'x'+size.height);
                     if(size.width===1280) for(const time of [2.5,4.5]){
-                        await evaluate("(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+"+time+"/10*(t.end-t.start),behavior:'instant'});})()");
+                        await evaluate("(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+"+time+"/t.animation.duration()*(t.end-t.start),behavior:'instant'});})()");
                         await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
                         await screenshot('transition-'+time);
                     }
@@ -334,7 +356,7 @@ async function main() {
                 const index=ids.indexOf(${JSON.stringify(id)});
                 const trigger=window.ScrollTrigger?.getById('liceomap-cinema');
                 const el=document.getElementById(${JSON.stringify(id)});
-                const top=trigger && index>=0 ? trigger.start+(index*2+1.45)/10*(trigger.end-trigger.start)
+                const top=trigger && index>=0 ? trigger.start+(index*2+1.45)/trigger.animation.duration()*(trigger.end-trigger.start)
                     : el.getBoundingClientRect().top+scrollY+el.offsetHeight/2-innerHeight/2;
                 window.scrollTo({top,behavior:'instant'});
             })()`);
@@ -375,7 +397,7 @@ async function main() {
         await settled();
         const afterHandoff=await entryBox();
         for(const key of ['x','y','width','height']) assert(Math.abs(beforeHandoff[key]-afterHandoff[key])<.05,'Entry handoff '+key);
-        await evaluate("(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+.1*(t.end-t.start),behavior:'instant'});})()");
+        await evaluate("(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+1/t.animation.duration()*(t.end-t.start),behavior:'instant'});})()");
         await settled();
         const firstScene=await entryBox();
         for(const key of ['x','y','width','height']) assert(Math.abs(afterHandoff[key]-firstScene[key])<.05,'First scene continuity '+key);
@@ -384,7 +406,7 @@ async function main() {
         await verifyFonts();
         assert.equal(await evaluate("document.querySelector('.story').dataset.scene"), 'concepto');
         await screenshot('desktop');
-        assert((await evaluate("document.querySelector('#map-status').textContent")).includes('No se pudo cargar'));
+        assert(await evaluate("!document.querySelector('#mapa-container, #map-status') && document.querySelectorAll('.purpose-chapter').length === 4"));
         for (const [id, screen] of [['servicios','map'],['horarios','home'],['anuncios','news'],['orientacion','home']]) {
             await goTo(id);
             await until(() => evaluate(`document.querySelector('.story').dataset.scene === ${JSON.stringify(id)}`), id);
@@ -396,7 +418,7 @@ async function main() {
         assert.equal(await evaluate("document.querySelectorAll('.pin-spacer').length"), 1);
         assert.equal(await evaluate("getComputedStyle(document.querySelector('.screen-home')).objectFit"),'contain');
         const seek = async progress => {
-            await evaluate(`(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+${progress}*(t.end-t.start),behavior:'instant'});})()`);
+            await evaluate(`(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+${progress}*10/t.animation.duration()*(t.end-t.start),behavior:'instant'});})()`);
             await settled();
         };
         await seek(.15);
@@ -527,20 +549,11 @@ async function main() {
         await screenshot('mobile');
         await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
         await settled();
+        await until(async () => (await state()).animations.length === 0, 'dynamic reduced-motion animation cleanup');
         assert.equal((await state()).animations.length, 0);
         assert.equal(await evaluate("document.querySelectorAll('.pin-spacer').length"),0);
-        // Leaflet API integration with deterministic tile callbacks, no external service.
-        await call('Page.addScriptToEvaluateOnNewDocument', { source: `window.mapProbe={};
-            window.L={map:id=>{mapProbe.id=id;return{setView:(center,zoom)=>{mapProbe.center=center;mapProbe.zoom=zoom;return{}}}},
-            tileLayer:(url,options)=>({addTo:()=>({on:(type,fn)=>{mapProbe[type]=fn}})}),
-            marker:point=>({addTo:()=>({bindPopup:html=>{mapProbe.popup=html}})})};` });
-        await navigate();
-        assert.equal(await evaluate('mapProbe.id'), 'map');
-        assert.equal(await evaluate('mapProbe.zoom'), 17);
-        await evaluate("mapProbe.tileerror()");
-        assert.equal(await evaluate("document.querySelector('#map-status').hidden"), false);
-        await evaluate("mapProbe.tileload()");
-        assert.equal(await evaluate("document.querySelector('#map-status').hidden"), true);
+        // The removed geographic map must not leave a public dependency or anchor.
+        assert(await evaluate("!document.querySelector('[href=\"#mapa-container\"], [src*=\"leaflet\"], [href*=\"leaflet\"]')"));
         // Administration remains independent if the decorative script is unavailable.
         await call('Network.setBlockedURLs', { urls:['https://*','http://*','*story.js*'] });
         await navigate();
@@ -568,7 +581,7 @@ async function main() {
         assert.equal(await evaluate("document.querySelectorAll('.capture-link').length"),3);
         assert.equal(await evaluate("document.querySelectorAll('.story-scene').length"),5);
         assert.deepEqual(errors, []);
-        console.log('PASS: GSAP pin/scrub, reversible poses, still state, crossfades, scenes, loader, admin/forms/focus/file, RUT, menu, Leaflet callbacks, responsive, reduced motion, no-JS, UTF-8.');
+        console.log('PASS: GSAP pin/scrub, reversible poses, still state, crossfades, scenes, loader, admin/forms/focus/file, RUT, menu, public map removal, responsive, reduced motion, no-JS, UTF-8.');
         await call('Browser.close');
     } finally {
         ws?.close();

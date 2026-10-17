@@ -202,38 +202,6 @@ window.addEventListener('resize', () => {
 });
 setMenuOpen(false);
 
-const mapStatus = document.getElementById('map-status');
-if (window.L && document.getElementById('map')) {
-    try {
-        const map = window.L.map('map').setView([-18.4746, -70.3102], 17);
-        const tiles = window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        tiles.on('tileload', () => {
-            if (mapStatus) mapStatus.hidden = true;
-        });
-        tiles.on('tileerror', () => {
-            if (mapStatus) {
-                mapStatus.textContent = 'No se pudieron cargar las imágenes del mapa. Comprueba tu conexión.';
-                mapStatus.hidden = false;
-            }
-        });
-
-        window.L.marker([-18.4746, -70.3102]).addTo(map)
-            .bindPopup('<strong>Liceo B4 Antonio Varas</strong><br>Arica, Chile.');
-        if (mapStatus) mapStatus.hidden = true;
-    } catch (error) {
-        console.error('No se pudo inicializar el mapa:', error);
-        if (mapStatus) {
-            mapStatus.textContent = 'El mapa no está disponible. El resto de la página sigue funcionando.';
-        }
-    }
-} else if (mapStatus) {
-    mapStatus.textContent = 'No se pudo cargar el mapa interactivo. El resto de la página sigue funcionando.';
-}
-
 const adminModal = document.getElementById('admin-modal');
 const adminDashboard = document.getElementById('admin-dashboard');
 const demoDialog = adminModal?.querySelector('[role="dialog"]');
@@ -375,10 +343,6 @@ document.querySelectorAll('.admin-tab-btn').forEach((button) => {
 const studentDemoForm = document.getElementById('student-demo-form');
 const studentRutInput = document.getElementById('rut-input');
 const studentDemoStatus = document.getElementById('student-demo-status');
-const demoCourses = ['A', 'B', 'C', 'D', 'E'].flatMap((section) =>
-    [1, 2, 3, 4].map((grade) => `${grade}° Medio ${section}`)
-);
-
 function rutVerifier(body) {
     let sum = 0;
     let multiplier = 2;
@@ -470,8 +434,7 @@ studentDemoForm?.addEventListener('submit', (event) => {
     studentDemoStatus.classList.toggle('is-error', !isValid);
     studentDemoStatus.classList.toggle('is-success', isValid);
     if (isValid) {
-        const course = demoCourses[Math.floor(Math.random() * demoCourses.length)];
-        studentDemoStatus.textContent = `Consulta simulada: estudiante detectado en ${course}.`;
+        studentDemoStatus.textContent = 'Formato válido. Consulta simulada: curso de ejemplo 3° Medio A. No se consultaron matrículas.';
     } else {
         studentDemoStatus.textContent = 'Revisa el RUT: debe tener 7 u 8 dígitos y un dígito verificador válido.';
     }
