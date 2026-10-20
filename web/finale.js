@@ -29,7 +29,7 @@ function initCourseDemo() {
         if (returnFocus) root.querySelector('#course-result-title').focus({ preventScroll: true });
         if (window.gsap && !motion.matches) {
             animation = window.gsap.fromTo(root.querySelector('.demo-result-card'),
-                { y: 12, opacity: .6 }, { y: 0, opacity: 1, duration: .28, clearProps: 'transform,opacity', ease: 'power2.out' });
+                { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: .36, clearProps: 'transform,opacity', ease: 'power3.out' });
         }
     }
     function run() {
@@ -47,11 +47,11 @@ function initCourseDemo() {
             steps.forEach((step, i) => {
                 animation.call(() => {
                     step.setAttribute('data-complete', 'true');
-                }, [], i * .3);
-                animation.fromTo(step, { x: 8, opacity: .55 },
-                    { x: 0, opacity: 1, duration: .22, clearProps: 'transform,opacity' }, i * .3);
+                }, [], i * .34);
+                animation.fromTo(step, { y: 8, opacity: 0 },
+                    { y: 0, opacity: 1, duration: .32, clearProps: 'transform,opacity', ease: 'power2.out' }, i * .34);
             });
-            animation.to({}, { duration: 1.05 }, 0);
+            animation.to({}, { duration: 1.22 }, 0);
         } catch { finish(); }
     }
     start.addEventListener('click', run);
@@ -98,28 +98,46 @@ function initFinaleTransition() {
             if (style === null) element.removeAttribute('style');
             else element.setAttribute('style', style);
         });
-        let context;
+        let context, trigger;
+        function synchronizePause() {
+            if (!trigger) return;
+            if (document.hidden || document.body.classList.contains('cinema-paused')) {
+                trigger.disable(false);
+                trigger.animation.pause();
+            } else {
+                trigger.enable(false, false);
+                trigger.update();
+            }
+        }
+        const pauseObserver = new MutationObserver(synchronizePause);
         try {
             context = gsap.context(() => {
-                gsap.set(section.querySelectorAll('.demo-title-line'), { y: 38, opacity: .2 });
+                gsap.set(section.querySelectorAll('.demo-title-line'), { y: 24, opacity: .2 });
                 const timeline = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: {
-                    id: 'liceomap-finale', trigger: section, start: 'top bottom', end: 'top 80px', scrub: true, invalidateOnRefresh: true
+                    id: 'liceomap-finale', trigger: section, start: 'top bottom', end: 'top 80px', scrub: .25, invalidateOnRefresh: true,
+                    onLeave: self => self.getTween()?.progress(1),
+                    onLeaveBack: self => self.getTween()?.progress(1)
                 } });
+                trigger = timeline.scrollTrigger;
                 // Separate parent layer: the approved art's scale is still owned
                 // exclusively by the existing narrative's master timeline.
                 timeline.fromTo(purpose.querySelector('.purpose-origin-outro'), { scale: 1, x: 0, y: 0 },
-                    { scale: .55, x: 45, y: 20, duration: .65 }, 0);
-                timeline.fromTo(dusk, { opacity: 0 }, { opacity: 1, duration: 1 }, 0);
-                timeline.fromTo(edge, { opacity: 0 }, { opacity: 1, duration: .12 }, 0);
-                timeline.fromTo([edgeNight, section.querySelector('.demo-edge-night')], { opacity: 0 }, { opacity: 1, duration: 1 }, 0);
-                timeline.fromTo(section.querySelector('.demo-night'), { opacity: 0 }, { opacity: 1, duration: 1 }, 0);
+                    { scale: .55, x: 45, y: 20, duration: .8, ease: 'sine.inOut' }, 0);
+                // Matching background/edge curves keep the seam continuous at every progress.
+                timeline.fromTo(dusk, { opacity: 0 }, { opacity: 1, duration: 1, ease: 'sine.inOut' }, 0);
+                timeline.fromTo(edge, { opacity: 0 }, { opacity: 1, duration: .2, ease: 'sine.inOut' }, 0);
+                timeline.fromTo([edgeNight, section.querySelector('.demo-edge-night')], { opacity: 0 }, { opacity: 1, duration: 1, ease: 'sine.inOut' }, 0);
+                timeline.fromTo(section.querySelector('.demo-night'), { opacity: 0 }, { opacity: 1, duration: 1, ease: 'sine.inOut' }, 0);
                 timeline.to(section.querySelectorAll('.demo-title-line'),
-                    { y: 0, opacity: 1, duration: .45, stagger: .11 }, .08);
+                    { y: 0, opacity: 1, duration: .5, stagger: .095, ease: 'power3.out' }, .08);
                 timeline.fromTo(section.querySelector('.demo-interface-reveal'), { y: 58, scale: .96, opacity: .15 },
-                    { y: 0, scale: 1, opacity: 1, duration: .6 }, .4);
+                    { y: 0, scale: 1, opacity: 1, duration: .56, ease: 'power3.out' }, .32);
                 timeline.fromTo(section.querySelector('.demo-coordinate'), { y: -65, scale: 1.4, opacity: .6 },
-                    { y: 0, scale: 1, opacity: .22, duration: 1 }, 0);
+                    { y: 0, scale: 1, opacity: .22, duration: 1, ease: 'sine.inOut' }, 0);
             });
+            pauseObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+            document.addEventListener('visibilitychange', synchronizePause);
+            synchronizePause();
         } catch (error) {
             context?.revert();
             restoreStyles();
@@ -127,7 +145,11 @@ function initFinaleTransition() {
             console.warn('El desenlace se muestra sin animación.', error);
             return;
         }
-        return () => { context?.revert(); restoreStyles(); dusk.remove(); edge.remove(); };
+        return () => {
+            pauseObserver.disconnect();
+            document.removeEventListener('visibilitychange', synchronizePause);
+            context?.revert(); restoreStyles(); dusk.remove(); edge.remove();
+        };
     });
 }
 

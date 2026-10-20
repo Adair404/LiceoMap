@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
-module.exports=async function({call,evaluate,navigate,until,screenshot,profile,web}) {
+module.exports=async function({call,evaluate,navigate,until,screenshot,profile,web,reviewDirectory='phase52'}) {
     const privacyProbe=await call('Page.addScriptToEvaluateOnNewDocument',{source:`
         window.__phase52Effects={network:0,storage:0,logs:0,submits:0};
         const track=(target,key,counter)=>{const original=target[key];target[key]=function(...args){window.__phase52Effects[counter]++;return original.apply(this,args);};};
@@ -7,7 +7,10 @@ module.exports=async function({call,evaluate,navigate,until,screenshot,profile,w
         track(Storage.prototype,'setItem','storage');track(console,'log','logs');
         document.addEventListener('submit',event=>{if(event.target.id==='student-demo-form')window.__phase52Effects.submits++;});
     `});
-    const frame=()=>evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+    const frame=()=>evaluate(`(async()=>{
+        await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+        while(window.ScrollTrigger?.getAll().some(t=>t.getTween()?.isActive?.())) await new Promise(requestAnimationFrame);
+    })()`);
     const seek=async time=>{await evaluate(`(()=>{const t=ScrollTrigger.getById('liceomap-cinema');scrollTo({top:t.start+${time}/t.animation.duration()*(t.end-t.start),behavior:'instant'})})()`);await frame();};
     const finale=async progress=>{await evaluate(`(()=>{const t=ScrollTrigger.getById('liceomap-finale');scrollTo({top:t.start+${progress}*(t.end-t.start),behavior:'instant'})})()`);await frame();};
     const report=[];
@@ -121,7 +124,7 @@ module.exports=async function({call,evaluate,navigate,until,screenshot,profile,w
     assert(await evaluate("document.querySelector('.demo-static-result').textContent.includes('3'+String.fromCharCode(176)+' Medio A')"),'No-JS fictional result present');
     await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:privacyProbe.identifier});
     fs.writeFileSync(path.join(profile,'phase52.json'),JSON.stringify(report,null,2));
-    const review=path.join(web,'review','phase52');fs.mkdirSync(review,{recursive:true});
+    const review=path.join(web,'review',reviewDirectory);fs.mkdirSync(review,{recursive:true});
     for(const suffix of ['1280-chapter-13.4','1280-chapter-15.8','1280-chapter-18.8','1280-chapter-24.1','1280-finale-0.5','1280-finale-1','1280-process','1280-result','390-chapter-15.8','390-chapter-18.8','390-chapter-24.1','390-finale-1','390-result'])
         fs.copyFileSync(path.join(profile,'phase52-'+suffix+'.png'),path.join(review,suffix+'.png'));
     fs.copyFileSync(path.join(profile,'phase52.json'),path.join(review,'checks.json'));

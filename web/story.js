@@ -16,10 +16,9 @@ const STORY_MOTION = Object.freeze({
     screenFadeDuration: .4,
     headlineTravel: 14,
     cardTravel: 28,
-    cardDuration: .35
+    cardDuration: .42
 });
-// Only the first departure starts earlier. Its arrival and every later beat
-// retain their approved 4.3 timing and poses; the pin and scrub stay unchanged.
+// Retain approved departure/arrival positions and the native pin geometry.
 const FIRST_DEPARTURE = Object.freeze({ idleRatio: .7, heroFadeEnd: 1.55 });
 
 // One GSAP timeline owns every scroll-driven transform. No parallel scroll loop.
@@ -97,7 +96,10 @@ function initStory({ onScroll = () => {} } = {}) {
 
     function handleHash() {
         const index = panels.findIndex(panel => '#' + panel.id === window.location.hash);
-        if (index >= 0) navigateTo(index, 'instant');
+        if (index >= 0 && navigateTo(index, 'instant')) window.requestAnimationFrame(() => {
+            trigger?.update();
+            trigger?.getTween()?.progress(1);
+        });
     }
 
     media.add({
@@ -193,7 +195,13 @@ function initStory({ onScroll = () => {} } = {}) {
                     scrollTrigger: {
                         id: 'liceomap-cinema', trigger: story, pin: viewport,
                         start: 'top top', end: () => '+=' + Math.round(height() * (compact ? 3.8 : 4.5)),
-                        scrub: true, anticipatePin: 1, invalidateOnRefresh: true,
+                        scrub: compact ? .25 : .35, anticipatePin: 1, invalidateOnRefresh: true,
+                        // Native unpinning must not leave the composition catching up offscreen.
+                        onLeave: self => self.getTween()?.progress(1),
+                        onLeaveBack: self => self.getTween()?.progress(1),
+                        // ScrollTrigger offsets a pin at page start to -0.001px;
+                        // native scroll cannot cross it, so onLeaveBack alone is insufficient.
+                        onUpdate: self => { if (self.scroll() === 0) self.getTween()?.progress(1); },
                         onRefreshInit: updateLayout
                     }
                 });
@@ -205,7 +213,7 @@ function initStory({ onScroll = () => {} } = {}) {
                         return poseCache.get(target);
                     };
                     const properties = Object.fromEntries(Object.keys(target).map(key => [key, () => fitted()[key]]));
-                    return timeline.to(phone, { ...properties, duration, ease: 'power1.inOut' }, at);
+                    return timeline.to(phone, { ...properties, duration, ease: 'sine.inOut' }, at);
                 };
                 const initialPose = () => {
                     if (!poseCache.has(readingPose)) poseCache.set(readingPose, fitPose(readingPose, 0));
@@ -238,20 +246,20 @@ function initStory({ onScroll = () => {} } = {}) {
                             { autoAlpha: 1, duration: .2 }, at + .24);
                         timeline.fromTo(panel.querySelectorAll('.headline-line'),
                             { autoAlpha: 0, y: STORY_MOTION.headlineTravel },
-                            { autoAlpha: 1, y: 0, duration: .32, stagger: .07, ease: 'power2.out' }, at + .34);
+                            { autoAlpha: 1, y: 0, duration: .4, stagger: .07, ease: 'power3.out' }, at + .34);
                         timeline.fromTo(panel.querySelector('.scene-lead'), { autoAlpha: 0, y: 12 },
                             { autoAlpha: 1, y: 0, duration: .3, ease: 'power2.out' }, at + .48);
                     }
                     if (index < panels.length - 1) timeline.to(panel,
-                        { autoAlpha: 0, duration: index === 0 ? FIRST_DEPARTURE.heroFadeEnd - 1.55 * FIRST_DEPARTURE.idleRatio : .28 },
+                        { autoAlpha: 0, ease: 'sine.inOut', duration: index === 0 ? FIRST_DEPARTURE.heroFadeEnd - 1.55 * FIRST_DEPARTURE.idleRatio : .28 },
                         index === 0 ? 1.55 * FIRST_DEPARTURE.idleRatio : at + 1.55);
                     const card = panel.querySelector('.story-card');
                     if (card) {
                         const cardX = compact ? 0 : (index === 2 || index === 4 ? -1 : 1) * STORY_MOTION.cardTravel;
                         timeline.fromTo(card, { autoAlpha: 0, x: cardX, y: 8 },
-                            { autoAlpha: 1, x: 0, y: 0, duration: STORY_MOTION.cardDuration, ease: 'power2.out' }, at + .62);
+                            { autoAlpha: 1, x: 0, y: 0, duration: STORY_MOTION.cardDuration, ease: 'power3.out' }, at + .58);
                         if (index < 4) timeline.to(card,
-                            { autoAlpha: 0, x: cardX * .4, y: 0, duration: .2 }, at + 1.45);
+                            { autoAlpha: 0, x: cardX * .4, y: 0, duration: .3, ease: 'sine.inOut' }, at + 1.45);
                     }
                 });
 
@@ -264,14 +272,14 @@ function initStory({ onScroll = () => {} } = {}) {
                 });
                 // Only gradient opacity changes: no filtered layers or ambient animation loop.
                 [[1.8, .65, .3], [3.8, .8, .2], [5.8, .5, .6], [7.8, .55, .4]].forEach(([at, blue, teal]) => {
-                    timeline.to(ambientBlue, { opacity: blue, duration: .6 }, at);
-                    timeline.to(ambientTeal, { opacity: teal, duration: .6 }, at);
+                    timeline.to(ambientBlue, { opacity: blue, duration: .7, ease: 'sine.inOut' }, at);
+                    timeline.to(ambientTeal, { opacity: teal, duration: .7, ease: 'sine.inOut' }, at);
                 });
                 timeline.fromTo(story.querySelector('.notification-chip'), { autoAlpha: 0, y: 18 },
-                    { autoAlpha: 1, y: 0, duration: .35 }, 6.85);
-                timeline.to(story.querySelector('.notification-chip'), { autoAlpha: 0, y: -12, duration: .2 }, 7.45);
+                    { autoAlpha: 1, y: 0, duration: .4, ease: 'power2.out' }, 6.85);
+                timeline.to(story.querySelector('.notification-chip'), { autoAlpha: 0, y: -12, duration: .25, ease: 'sine.inOut' }, 7.45);
                 timeline.fromTo(map, { autoAlpha: 0, y: STORY_MOTION.cardTravel },
-                    { autoAlpha: 1, y: 0, duration: .6 }, 8.38);
+                    { autoAlpha: 1, y: 0, duration: .6, ease: 'power2.out' }, 8.38);
 
                 function describeScene() {
                     const progress = timeline.progress();

@@ -85,12 +85,13 @@ function initPurpose() {
             }
             const at = beats[Math.max(0, index)];
             window.scrollTo({ top: trigger.start + at / master.duration() * (trigger.end - trigger.start), behavior: 'instant' });
-            trigger.update();
-            syncAccess();
-            if (event.type === 'click') window.requestAnimationFrame(() => {
-                // Native scrolling is committed on the next rendering opportunity.
-                // This schedules focus only; animation remains entirely scroll driven.
-                if (active === Math.max(0, index)) chapters[Math.max(0, index)].focus({ preventScroll: true });
+            window.requestAnimationFrame(() => {
+                // Commit native scroll first, then finish only this direct jump's scrub.
+                // Focus must land on the rendered chapter, including on reverse jumps.
+                trigger.update();
+                trigger.getTween()?.progress(1);
+                syncAccess();
+                if (event.type === 'click' && active === Math.max(0, index)) chapters[Math.max(0, index)].focus({ preventScroll: true });
             });
         }
         function restore() {
@@ -140,48 +141,49 @@ function initPurpose() {
                 gsap.set([challenge, solution, vision, deck, root.querySelector('.purpose-nav'), root.querySelector('.purpose-masthead')], { autoAlpha: 0 });
                 gsap.set(cards, { autoAlpha: 0 });
                 gsap.set(pillars, { autoAlpha: 0 });
-                gsap.set(intro.querySelectorAll('.purpose-line'), { yPercent: 110, autoAlpha: 0 });
+                gsap.set(intro.querySelectorAll('.purpose-line'), { y: 18, autoAlpha: 0 });
                 gsap.set(intro.querySelector('.purpose-intro-bottom'), { y: 35, autoAlpha: 0 });
                 gsap.set(root.querySelector('.purpose-connection-light'), { strokeDashoffset: 1 });
                 sequence = gsap.timeline({ defaults: { ease: 'none' } });
                 // Local time 0 = original time 10. No other controller writes phone transforms.
                 sequence.to(viewport.querySelectorAll('.story-scenes,.closing-map,.cinema-controls,.cinema-exit,#hero-phone-caption'), { autoAlpha: 0, duration: .4 }, 0);
-                sequence.to(phone, { x: 0, y: () => -38 + (compact ? 6 : 0), rotationX: 0, rotationY: 0, rotation: 0, scale: 1, duration: .55, ease: 'power1.inOut' }, .1);
+                sequence.to(phone, { x: 0, y: () => -38 + (compact ? 6 : 0), rotationX: 0, rotationY: 0, rotation: 0, scale: 1, duration: .45, ease: 'sine.inOut' }, .1);
                 // The vector surface replaces the capture before extreme magnification.
-                sequence.to(surface, { opacity: 1, duration: .45 }, .65);
+                sequence.to(surface, { opacity: 1, duration: .5, ease: 'sine.inOut' }, .55);
                 sequence.to(phone, { z: 240, scale: () => Math.max(innerWidth / screen.offsetWidth, innerHeight / screen.offsetHeight) * 1.18,
-                    y: () => -38 + (compact ? 6 : 0), duration: 1.15, ease: 'power2.in' }, .65);
+                    y: () => -38 + (compact ? 6 : 0), duration: 1.4, ease: 'power1.in' }, .55);
                 // Identical solid color, opaque screen already covering every corner.
-                sequence.to(root, { autoAlpha: 1, duration: .18 }, 1.8);
-                sequence.to(intro.querySelectorAll('.purpose-line'), { yPercent: 0, autoAlpha: 1, stagger: .13, duration: .45, ease: 'power2.out' }, 1.95);
-                sequence.to(viewport.querySelector('.story-stage'), { autoAlpha: 0, duration: .01 }, 2.01);
+                sequence.to(root, { autoAlpha: 1, duration: .3, ease: 'sine.inOut' }, 1.8);
+                sequence.to(intro.querySelectorAll('.purpose-line'), { y: 0, autoAlpha: 1, stagger: .12, duration: .62, ease: 'power3.out' }, 1.95);
+                // The flight continues under the matching opaque surface; no visible freeze/cut.
+                sequence.to(viewport.querySelector('.story-stage'), { autoAlpha: 0, duration: .18, ease: 'sine.inOut' }, 2.1);
                 sequence.to(root.querySelectorAll('.purpose-nav,.purpose-masthead'), { autoAlpha: 1, duration: .3 }, 2.2);
-                sequence.to(intro.querySelector('.purpose-intro-bottom'), { autoAlpha: 1, y: 0, duration: .55 }, 2.65);
+                sequence.to(intro.querySelector('.purpose-intro-bottom'), { autoAlpha: 1, y: 0, duration: .55, ease: 'power2.out' }, 2.65);
                 sequence.to(intro.querySelector('.purpose-wordmark'), { x: compact ? 0 : 24, duration: .8 }, 3);
-                sequence.to(intro, { autoAlpha: 0, scale: .88, y: -50, duration: .55 }, 4.05);
-                sequence.fromTo(challenge, { autoAlpha: 0, y: 65 }, { autoAlpha: 1, y: 0, duration: .5 }, 4.3);
+                sequence.to(intro, { autoAlpha: 0, scale: .98, y: -24, duration: .55, ease: 'sine.inOut' }, 4.05);
+                sequence.fromTo(challenge, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: .55, ease: 'power3.out' }, 4.3);
                 sequence.set(deck, { autoAlpha: 1 }, 4.35);
                 cards.forEach((card, i) => {
                     const target = Object.fromEntries(Object.keys(scattered(i)).map(key => [key, () => scattered(i)[key]]));
-                    const origin = compact ? { x: (i % 2 ? 1 : -1) * innerWidth * .9, y: i * cardStep() + 45, rotation: (i - 1) * 8, scale: .8 }
-                        : { x: (i - 1) * innerWidth * .65, y: i === 1 ? 190 : -80, rotation: (i - 1) * 18, scale: .6 };
-                    sequence.fromTo(card, { ...origin, autoAlpha: 0 }, { ...target, autoAlpha: 1, duration: .7, ease: 'power2.out', immediateRender: false }, 4.4 + i * .19);
+                    const origin = compact ? { x: () => (i % 2 ? 1 : -1) * innerWidth * .9, y: () => i * cardStep() + 45, rotation: (i - 1) * 8, scale: .8 }
+                        : { x: () => (i - 1) * innerWidth * .65, y: i === 1 ? 190 : -80, rotation: (i - 1) * 18, scale: .6 };
+                    sequence.fromTo(card, { ...origin, autoAlpha: 0 }, { ...target, autoAlpha: 1, duration: .85, ease: 'power3.out', immediateRender: false }, 4.4 + i * .19);
                     const connected = Object.fromEntries(Object.keys(pose(i)).map(key => [key, () => pose(i)[key]]));
-                    sequence.to(card, { ...connected, duration: .9, ease: 'power2.inOut' }, 6.65);
-                    sequence.to([...card.children].filter(child => child !== pillars[i]), { autoAlpha: 0, y: -14, duration: .35 }, 7.1 + i * .06);
-                    sequence.fromTo(pillars[i], { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: .45, immediateRender: false }, 7.5 + i * .08);
+                    sequence.to(card, { ...connected, duration: .94, ease: 'sine.inOut' }, 6.65 + i * .04);
+                    sequence.to([...card.children].filter(child => child !== pillars[i]), { autoAlpha: 0, y: -14, duration: .42, ease: 'sine.inOut' }, 7.1 + i * .06);
+                    sequence.fromTo(pillars[i], { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .52, ease: 'power2.out', immediateRender: false }, 7.5 + i * .08);
                 });
-                sequence.to(challenge, { autoAlpha: 0, y: -35, duration: .4 }, 6.95);
-                sequence.fromTo(solution, { autoAlpha: 0, y: 38 }, { autoAlpha: 1, y: 0, duration: .55 }, 7.45);
+                sequence.to(challenge, { autoAlpha: 0, y: -24, duration: .45, ease: 'sine.inOut' }, 6.95);
+                sequence.fromTo(solution, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: .6, ease: 'power3.out' }, 7.45);
                 sequence.to(root.querySelector('.purpose-connection-light'), { strokeDashoffset: 0, duration: .8 }, 7.85);
-                sequence.to(horizon, { opacity: 1, duration: 1.1 }, 10.85);
-                sequence.to(deck, { scale: .56, y: compact ? 20 : 55, autoAlpha: 0, duration: .8 }, 10.35);
-                sequence.to(solution, { autoAlpha: 0, y: -25, duration: .5 }, 10.55);
-                sequence.fromTo(vision, { autoAlpha: 0, y: 48, scale: 1.06 }, { autoAlpha: 1, y: 0, scale: 1, duration: .7 }, 10.95);
-                sequence.fromTo(vision.querySelector('.purpose-origin-art'), { scale: .58 }, { scale: 1, duration: 1.2 }, 11);
-                sequence.fromTo(vision.querySelectorAll('.purpose-community'), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .6, stagger: .14 }, 11.55);
-                sequence.fromTo(vision.querySelector('.purpose-future'), { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: .5 }, 12.1);
-                sequence.fromTo(vision.querySelector('.purpose-handoff'), { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: .5 }, 13.15);
+                sequence.to(horizon, { opacity: 1, duration: 1.1, ease: 'sine.inOut' }, 10.85);
+                sequence.to(deck, { scale: .56, y: compact ? 20 : 55, autoAlpha: 0, duration: 1, ease: 'sine.inOut' }, 10.15);
+                sequence.to(solution, { autoAlpha: 0, y: -25, duration: .5, ease: 'sine.inOut' }, 10.55);
+                sequence.fromTo(vision, { autoAlpha: 0, y: 24, scale: 1.02 }, { autoAlpha: 1, y: 0, scale: 1, duration: .8, ease: 'power2.out' }, 10.95);
+                sequence.fromTo(vision.querySelector('.purpose-origin-art'), { scale: .58 }, { scale: 1, duration: 1.35, ease: 'sine.inOut' }, 11);
+                sequence.fromTo(vision.querySelectorAll('.purpose-community'), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .65, stagger: .14, ease: 'power2.out' }, 11.55);
+                sequence.fromTo(vision.querySelector('.purpose-future'), { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: .5, ease: 'power2.out' }, 12.1);
+                sequence.fromTo(vision.querySelector('.purpose-handoff'), { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: .5, ease: 'power2.out' }, 13.15);
                 sequence.to({}, { duration: duration - 10 }, 0);
             }, root);
             master.add(sequence, 10);

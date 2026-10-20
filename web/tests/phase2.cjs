@@ -74,7 +74,7 @@ async function main() {
         });
         const call = (method, params = {}) => new Promise((resolve, reject) => {
             const next = ++id;
-            const timer=setTimeout(()=>{pending.delete(next);reject(Error('Chrome CDP timed out: '+method+' '+stderr));},30000);
+            const timer=setTimeout(()=>{pending.delete(next);reject(Error('Chrome CDP timed out: '+method+' '+stderr));},method==='Runtime.evaluate'?120000:30000);
             pending.set(next, { resolve, reject, timer });
             ws.send(JSON.stringify({ id: next, method, params }));
         });
@@ -137,12 +137,29 @@ async function main() {
         await call('CSS.enable');
         await call('Network.enable');
         await call('Network.setBlockedURLs', { urls: ['https://*', 'http://*'] });
+        if(process.argv.includes('--phase53-motion')) {
+            await require('./phase53-motion.cjs')({call,evaluate,navigate,until,screenshot,profile,web});
+            assert.deepEqual(errors, []);
+            await call('Browser.close');
+            return;
+        }
+        if(process.argv.includes('--phase53') || process.argv.includes('--phase53-baseline')) {
+            await require('./phase53.cjs')({call,evaluate,navigate,until,screenshot,profile,web,
+                baseline:process.argv.includes('--phase53-baseline')});
+            assert.deepEqual(errors, []);
+            await call('Browser.close');
+            return;
+        }
         if(process.argv.includes('--phase52')) {
             require('./phase52-integrity.cjs');
             await require('./phase52.cjs')({call,evaluate,navigate,until,screenshot,profile,web});
             assert.deepEqual(errors, []);
             await call('Browser.close');
             return;
+        }
+        if(process.argv.includes('--phase53-regression')) {
+            await require('./phase52.cjs')({call,evaluate,navigate,until,screenshot,profile,web,reviewDirectory:'phase53/regression'});
+            assert.deepEqual(errors, []);
         }
         if(process.argv.includes('--phase51-record') || process.argv.includes('--phase51') || process.argv.includes('--phase5')) {
             await require('./phase51.cjs')({call,evaluate,navigate,until,screenshot,profile,web,record:process.argv.includes('--phase51-record')});
@@ -188,7 +205,7 @@ async function main() {
                 await evaluate("Promise.all([...document.querySelectorAll('.screen-layer')].map(image=>image.decode()))");
                 for (const [index, time] of [1,3.45,5.45,7.45,9.3].entries()) {
                     await evaluate(`(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+${time}/t.animation.duration()*(t.end-t.start),behavior:'instant'});})()`);
-                    await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+                    await evaluate(`(async()=>{await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));while(ScrollTrigger.getAll().some(t=>t.getTween()?.isActive?.()))await new Promise(requestAnimationFrame);})()`);
                     const result = await evaluate(`(() => {
                         const box=el=>el.getBoundingClientRect().toJSON();
                         const visible=el=>el && getComputedStyle(el).visibility!=='hidden' && Number(getComputedStyle(el).opacity)>.95;
@@ -254,6 +271,7 @@ async function main() {
                         for(const progress of progresses){
                             window.scrollTo({top:trigger.start+progress*(trigger.end-trigger.start),behavior:'instant'});
                             await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+                            while(trigger.getTween()?.isActive?.()) await new Promise(requestAnimationFrame);
                             const r=phone.getBoundingClientRect();
                             const angles=['rotationX','rotationY','rotation'].map(key=>Number(gsap.getProperty(phone,key)));
                             const scale=Number(gsap.getProperty(phone,'scale'));
@@ -296,6 +314,7 @@ async function main() {
                         for(let step=progresses.length-1;step>=0;step--){
                             window.scrollTo({top:trigger.start+progresses[step]*(trigger.end-trigger.start),behavior:'instant'});
                             await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+                            while(trigger.getTween()?.isActive?.()) await new Promise(requestAnimationFrame);
                             const snapshot=JSON.stringify({phone:phone.style.transform,
                                 screens:[...document.querySelectorAll('.screen-layer')].map(el=>el.style.cssText),
                                 cards:[...document.querySelectorAll('.headline-line,.story-card')].map(el=>el.style.cssText)});
@@ -307,7 +326,7 @@ async function main() {
                     assert.deepEqual(audit.failures,[],'Transition clipping at '+size.width+'x'+size.height);
                     if(size.width===1280) for(const time of [2.5,4.5]){
                         await evaluate("(() => {const t=ScrollTrigger.getById('liceomap-cinema');window.scrollTo({top:t.start+"+time+"/t.animation.duration()*(t.end-t.start),behavior:'instant'});})()");
-                        await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+                        await evaluate(`(async()=>{await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));while(ScrollTrigger.getAll().some(t=>t.getTween()?.isActive?.()))await new Promise(requestAnimationFrame);})()`);
                         await screenshot('transition-'+time);
                     }
                 }
@@ -349,7 +368,10 @@ async function main() {
             return;
         }
         await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
-        const settled = () => evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
+        const settled = () => evaluate(`(async()=>{
+            await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+            while(window.ScrollTrigger?.getAll().some(t=>t.getTween()?.isActive?.())) await new Promise(requestAnimationFrame);
+        })()`);
         const goTo = async id => {
             await evaluate(`(() => {
                 const ids=['concepto','servicios','horarios','anuncios','orientacion'];
