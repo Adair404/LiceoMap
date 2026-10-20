@@ -53,3 +53,11 @@ Para definir las áreas internas dentro de cada bloque, se utiliza el prefijo de
 * **Nodos de Entrada a Bloques:** `node_ent_[id_bloque]` (Ejemplo: `node_ent_bloque_k`, `node_ent_bloque_h`)
 * **Nodos de Pasillos/Intersecciones:** `node_pasillo_[bloque]_[numero]` (Ejemplo: `node_pasillo_b_01`)
 * **Nodos de Patios y Accesos:** `node_patio_central_[numero]`, `node_acceso_loa`
+
+---
+
+## 5. Jerarquía de Mapa de Dos Niveles (zona → sala)
+* **Nivel 1 (mapa general):** cada pabellón/zona es un elemento del SVG general cuyo `id` coincide con `zonas.id_zona` / `zonas.id_svg` en la BD (ej. `bloque_b`).
+* **Nivel 2 (detalle):** al expandir una zona, la app carga un SVG de detalle registrado en `zonas_svg_detalle` (zona + piso → `archivo_svg`). Un mismo SVG puede cubrir varias zonas (hoy `zona_central_*.svg` cubre los bloques B, C, D y J).
+* **Salas:** la clave estable es `espacios.id_espacio`. `espacios.id_svg` es opcional (NULL) y solo se completa cuando la sala tiene su `id` definitivo en un SVG de detalle; `espacios.id_zona` indica a qué zona pertenece.
+* **IDs provisionales:** los ids `sala_provisional_*` de los SVG de detalle actuales no se usan en la BD hasta confirmar el mapeo definitivo.

@@ -17,3 +17,9 @@ local.properties
 *.log
 *.sqlite
 *.sql.gz
+
+# API (Python): secretos y entorno virtual
+.env
+api/.venv/
+__pycache__/
+.pytest_cache/

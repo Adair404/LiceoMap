@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LiceoMap · Cliente de prueba</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #183246; }
+        h1 { font-size: 1.4rem; }
+        fieldset { border: 1px solid #b5c4cd; border-radius: 8px; margin-bottom: 1rem; }
+        label { display: block; margin: .5rem 0 .2rem; font-weight: 600; }
+        input, button { padding: .5rem; font: inherit; }
+        button { cursor: pointer; margin-right: .5rem; }
+        pre { background: #f2f6f8; padding: .75rem; border-radius: 8px; overflow: auto; max-height: 320px; }
+        .error { color: #a43c35; font-weight: 600; }
+        .ok { color: #1d7a46; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <h1>LiceoMap · Cliente de prueba de la API</h1>
+    <p>Solo para validar el login y las consultas con datos sintéticos. No es la web oficial.</p>
+
+    <fieldset>
+        <legend>Inicio de sesión</legend>
+        <form id="login-form">
+            <label for="rut">RUT</label>
+            <input id="rut" autocomplete="username" placeholder="20.100.006-8" required>
+            <label for="password">Contraseña</label>
+            <input id="password" type="password" autocomplete="current-password" required>
+            <p><button type="submit">Ingresar</button><button type="button" id="logout" disabled>Cerrar sesión</button></p>
+        </form>
+        <p id="status" role="status"></p>
+    </fieldset>
+
+    <fieldset id="actions" disabled>
+        <legend>Consultas</legend>
+        <button type="button" data-path="/me">Mi perfil</button>
+        <button type="button" data-path="/anuncios">Anuncios</button>
+        <button type="button" id="my-schedule">Horario de mi curso / mío</button>
+        <button type="button" data-path="/zonas">Zonas del mapa</button>
+        <button type="button" data-path="/bloques-horarios">Bloques horarios</button>
+    </fieldset>
+
+    <pre id="output">Sin resultados todavía.</pre>
+
+    <script>
+        let token = null;
+        let profile = null;
+        const statusEl = document.getElementById('status');
+        const output = document.getElementById('output');
+
+        function setStatus(text, ok) {
+            statusEl.textContent = text;
+            statusEl.className = ok ? 'ok' : 'error';
+        }
+
+        async function api(path, options = {}) {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers.Authorization = `Bearer ${token}`;
+            const response = await fetch(path, { ...options, headers });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(`${response.status}: ${data.detail || 'error'}`);
+            return data;
+        }
+
+        function show(data) {
+            output.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function setSession(active) {
+            document.getElementById('actions').disabled = !active;
+            document.getElementById('logout').disabled = !active;
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            try {
+                const data = await api('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        rut: document.getElementById('rut').value,
+                        password: document.getElementById('password').value,
+                    }),
+                });
+                token = data.access_token;
+                profile = data.usuario;
+                document.getElementById('password').value = '';
+                setStatus(`Sesión iniciada: ${profile.nombre} ${profile.apellido} (${profile.rol})`, true);
+                setSession(true);
+                show(data.usuario);
+            } catch (error) {
+                token = profile = null;
+                setSession(false);
+                setStatus(error.message, false);
+            }
+        });
+
+        document.getElementById('logout').addEventListener('click', () => {
+            token = profile = null;
+            setSession(false);
+            setStatus('Sesión cerrada', true);
+            show({});
+        });
+
+        document.querySelectorAll('[data-path]').forEach((button) => {
+            button.addEventListener('click', async () => {
+                try { show(await api(button.dataset.path)); } catch (error) { setStatus(error.message, false); }
+            });
+        });
+
+        document.getElementById('my-schedule').addEventListener('click', async () => {
+            try {
+                if (profile.rol === 'alumno') {
+                    const me = await api('/me');
+                    show(me.cursos.length ? await api(`/cursos/${encodeURIComponent(me.cursos[0].id_curso)}/horarios`) : []);
+                } else {
+                    show(await api(`/profesores/${profile.id_usuario}/horarios`));
+                }
+            } catch (error) { setStatus(error.message, false); }
+        });
+    </script>
+</body>
+</html>
