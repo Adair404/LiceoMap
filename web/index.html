@@ -33,7 +33,10 @@
     <script defer src="vendor/gsap-3.15.0.min.js"></script>
     <script defer src="vendor/ScrollTrigger-3.15.0.min.js"></script>
     <script defer src="story.js"></script>
+    <script defer src="app-admin.js"></script>
     <script defer src="app.js"></script>
+    <meta name="liceomap-api-base" content="http://127.0.0.1:8000/">
+    <link rel="stylesheet" href="admin.css">
     <script defer src="purpose.js"></script>
     <script defer src="finale.js"></script>
 </head>
@@ -328,7 +331,7 @@
             <div class="modal-header">
                 <i data-feather="shield" class="modal-icon" aria-hidden="true"></i>
                 <h2 id="admin-dialog-title">Acceso Administrativo</h2>
-                <p>Panel de demostración para Dirección, UTP e Inspectoría. No autentica usuarios ni guarda cambios.</p>
+                <p>Acceso autorizado para UTP e Inspectoría. Versión preliminar.</p>
             </div>
             <form id="admin-login-form" class="modal-form">
                 <div class="form-group">
@@ -381,123 +384,51 @@
         <div class="admin-content">
             <header class="admin-topbar">
                 <h2 id="admin-dashboard-title" tabindex="-1">Panel de Administración Institucional</h2>
-                <span class="live-status"><span class="pulse-dot"></span> Modo demostración</span>
+                <span class="live-status"><span class="pulse-dot"></span> Preliminar · entorno local</span>
             </header>
 
             <!-- PESTAÑA: GESTIONAR ANUNCIOS -->
             <div id="tab-anuncios" class="admin-panel active" role="tabpanel" aria-labelledby="tab-button-anuncios" tabindex="0">
                 <div class="panel-header">
-                    <h3>Publicar Comunicado Oficial</h3>
-                    <p>Prueba el formulario de anuncios. No envía comunicados a estudiantes.</p>
+                    <h3>Gestionar anuncios</h3>
+                    <p>Las publicaciones guardadas estarán disponibles para sus destinatarios al actualizar.</p>
                 </div>
-                <form class="dashboard-form demo-form" data-demo-message="Demostración: comunicado validado; no se publicó.">
+                <form id="announcement-form" class="dashboard-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="demo-announcement-title">Título del Anuncio</label>
-                            <input id="demo-announcement-title" type="text" placeholder="Ej: Suspensión de clases por lluvia" required>
+                            <input id="demo-announcement-title" type="text" maxlength="150" placeholder="Título de la publicación" required>
                         </div>
                         <div class="form-group">
                             <label for="demo-announcement-level">Nivel de Urgencia</label>
                             <select id="demo-announcement-level">
-                                <option>Informativo General</option>
-                                <option>Urgente / Alerta</option>
-                                <option>Recordatorio UTP</option>
+                                <option value="INFORMATIVO">Informativo</option>
+                                <option value="URGENTE">Urgente</option>
+                                <option value="RECORDATORIO">Recordatorio</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="demo-announcement-body">Contenido del Comunicado</label>
-                        <textarea id="demo-announcement-body" rows="4" placeholder="Escribe el mensaje aquí..." required></textarea>
+                        <textarea id="demo-announcement-body" maxlength="5000" rows="4" placeholder="Escribe el mensaje aquí..." required></textarea>
                     </div>
-                    <button type="submit" class="btn-dash-primary">Emitir Comunicado</button>
-                    <p class="form-status" role="status" aria-live="polite"></p>
+                    <div class="form-group"><label for="announcement-course">Destinatarios</label><select id="announcement-course"><option value="">Toda la comunidad</option></select></div>
+                    <button id="announcement-save" type="submit" class="btn-dash-primary">Publicar anuncio</button>
+                    <button id="announcement-cancel" type="button" class="btn-dash-secondary" hidden>Cancelar edición</button>
+                    <p id="announcement-status" class="form-status" role="status" aria-live="polite"></p>
                 </form>
-            </div>
-
-            <!-- PESTAÑA: CARGAR HORARIOS -->
-            <div id="tab-horarios" class="admin-panel hidden" role="tabpanel" aria-labelledby="tab-button-horarios" tabindex="0" hidden>
-                <div class="panel-header">
-                    <h3>Sincronización de Horarios (UTP)</h3>
-                    <p>Selecciona un archivo de ejemplo. No se carga ni actualiza una base de datos.</p>
+                <div class="announcement-filters">
+                    <label>Estado <select id="announcement-state"><option value="todos">Todos</option><option value="publicados">Publicados</option><option value="retirados">Retirados</option></select></label>
+                    <label>Destinatarios <select id="announcement-recipient"><option value="">Todos</option><option value="global">Toda la comunidad</option></select></label>
+                    <button id="announcement-refresh" type="button" class="btn-dash-secondary">Actualizar lista</button>
                 </div>
-                <label class="upload-zone">
-                    <i data-feather="upload-cloud" class="upload-icon" aria-hidden="true"></i>
-                    <span class="upload-title">Haz clic o arrastra el archivo aquí</span>
-                    <span class="upload-help">Soporta formatos .xlsx y .csv de la plataforma ministerial</span>
-                    <input type="file" id="file-upload" class="upload-file-input" accept=".csv,.xlsx" aria-describedby="file-upload-status">
-                </label>
-                <p id="file-upload-status" class="form-status" role="status" aria-live="polite"></p>
-                <button id="demo-sync-schedule" class="btn-dash-primary mt-3" type="button">
-                    <i data-feather="refresh-cw"></i> Actualizar Base de Datos
-                </button>
-                <p id="schedule-demo-status" class="form-status" role="status" aria-live="polite"></p>
+                <p id="announcement-list-status" class="form-status" role="status" aria-live="polite"></p>
+                <div id="announcement-list" aria-live="polite"></div>
             </div>
 
-            <!-- PESTAÑA: EDITAR MAPA INTERACTIVO -->
-            <div id="tab-salas" class="admin-panel hidden" role="tabpanel" aria-labelledby="tab-button-salas" tabindex="0" hidden>
-                <div class="panel-header">
-                    <h3>Gestión de Espacios Físicos</h3>
-                    <p>Prueba la edición de espacios. Los cambios no se guardan.</p>
-                </div>
-                <form class="dashboard-form demo-form" data-demo-message="Demostración: cambios revisados; no se guardaron.">
-                    <div class="form-group">
-                        <label for="demo-map-sector">Seleccionar Sector del Mapa</label>
-                        <select id="demo-map-sector">
-                            <option>Pabellón A - Primer Piso</option>
-                            <option>Pabellón B - Segundo Piso</option>
-                            <option>Laboratorio de Enlaces</option>
-                            <option>CRA (Biblioteca)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="demo-map-name">Nuevo Nombre o Asignación Técnica</label>
-                        <input id="demo-map-name" type="text" placeholder="Ej: Sala de Robótica y Programación" required>
-                    </div>
-                    <button type="submit" class="btn-dash-primary">Guardar Cambios en Mapa</button>
-                    <p class="form-status" role="status" aria-live="polite"></p>
-                </form>
-            </div>
-
-            <!-- PESTAÑA: USUARIOS Y ESTUDIANTES -->
-            <div id="tab-usuarios" class="admin-panel hidden" role="tabpanel" aria-labelledby="tab-button-usuarios" tabindex="0" hidden>
-                <div class="panel-header">
-                    <h3>Gestión de Matrícula y Accesos</h3>
-                    <p>Filtra la tabla de ejemplo por nombre o RUT. No consulta registros reales.</p>
-                </div>
-                <form class="search-bar" id="demo-search-form">
-                    <i data-feather="search"></i>
-                    <label class="visually-hidden" for="demo-user-search">Buscar estudiantes</label>
-                    <input type="search" id="demo-user-search" placeholder="Buscar por RUT o Apellidos...">
-                    <button class="btn-dash-secondary" type="submit">Buscar</button>
-                </form>
-                <p id="demo-search-status" class="form-status" role="status" aria-live="polite"></p>
-
-                <table class="admin-table">
-                    <caption>Estudiantes y personal</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">RUT</th>
-                            <th scope="col">Nombre Completo</th>
-                            <th scope="col">Rol / Curso</th>
-                            <th scope="col">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>21.456.789-0</td>
-                            <td>González, Matías</td>
-                            <td>3° Medio A</td>
-                            <td><button class="btn-text" type="button">Ver Ficha</button></td>
-                        </tr>
-                        <tr>
-                            <td>12.345.678-9</td>
-                            <td>Director / UTP</td>
-                            <td><span class="tag-admin">Administrador</span></td>
-                            <td><button class="btn-text" type="button">Editar</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <div id="tab-horarios" class="admin-panel hidden" role="tabpanel" aria-labelledby="tab-button-horarios" hidden><p>En desarrollo.</p></div>
+            <div id="tab-salas" class="admin-panel hidden" role="tabpanel" aria-labelledby="tab-button-salas" hidden><p>En desarrollo.</p></div>
+            <div id="tab-usuarios" class="admin-panel hidden" role="tabpanel" aria-labelledby="tab-button-usuarios" hidden><p>En desarrollo.</p></div>
         </div>
     </section>
 

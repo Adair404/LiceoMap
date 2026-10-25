@@ -4,14 +4,20 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 module.exports = async function({call,evaluate,navigate,until,screenshot,profile,web,baseline}) {
-    const output = path.join(web,'review/phase53');
+    const output = path.resolve(web,'../.local/review/phase53');
     fs.mkdirSync(output,{recursive:true});
     const fixture = path.join(web,'tests/fixtures/phase53-baseline.json');
     const preserved = ['index.html','app.js','app-admin.js','style.css','purpose.css','finale.css',
         'vendor/gsap-3.15.0.min.js','vendor/ScrollTrigger-3.15.0.min.js'];
     const hashes = Object.fromEntries(preserved.map(file=>[file,crypto.createHash('sha256').update(fs.readFileSync(path.join(web,file),'utf8').replace(/\r\n/g,'\n')).digest('hex')]));
     const reference = baseline ? {hashes,reading:{}} : JSON.parse(fs.readFileSync(fixture,'utf8'));
-    if(!baseline) assert.deepEqual(hashes,reference.hashes,'Approved HTML, entry, navigation, admin, RUT, typography and all CSS preserved');
+    if(!baseline) {
+        // Administration is intentionally connected in preoficial. Keep the old fixture:
+        // compare every unchanged visual asset, then verify cinematic HTML/JS separately.
+        for (const file of preserved.filter(file=>!['index.html','app.js','app-admin.js'].includes(file)))
+            assert.equal(hashes[file],reference.hashes[file],file+' preserved');
+        require('./preoficial-integrity.cjs');
+    }
     const frames = () => evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
     const settle = async () => {
         await frames();

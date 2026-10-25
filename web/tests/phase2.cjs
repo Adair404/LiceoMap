@@ -60,6 +60,7 @@ async function main() {
         });
         let id = 0;
         const pending = new Map(), errors = [];
+        const networkFailures = [], browserLogs = [];
         ws.addEventListener('message', ({ data }) => {
             const message = JSON.parse(data);
             if (message.id) {
@@ -71,6 +72,8 @@ async function main() {
                 else request.resolve(message.result);
             }
             if (message.method === 'Runtime.exceptionThrown') errors.push(message.params.exceptionDetails);
+            if (message.method === 'Network.loadingFailed') networkFailures.push(message.params.errorText);
+            if (message.method === 'Log.entryAdded') browserLogs.push(message.params.entry.text);
         });
         const call = (method, params = {}) => new Promise((resolve, reject) => {
             const next = ++id;
@@ -94,12 +97,16 @@ async function main() {
                     events:window.__entryEvents,probe:window.__phase44,scrollY,hidden:document.hidden,
                     introHidden:document.querySelector('#app-preloader').hidden,
                     progress:ScrollTrigger.getById('liceomap-cinema')?.progress})`));
+                if(Date.now()>=deadline && label==='local page ready') console.log('Page diagnostic:',await evaluate(`({
+                    url:location.href,ready:document.readyState,entry:typeof initCinematicIntro,
+                    scripts:[...document.scripts].map(s=>s.src),errors:${JSON.stringify(errors)},
+                    networkFailures:${JSON.stringify(networkFailures)},logs:${JSON.stringify(browserLogs)}})`));
                 assert(Date.now() < deadline, 'Timed out: ' + label);
                 await wait(100);
             }
         };
         const navigate = async (scripts = true) => {
-            await call('Page.navigate', { url: pathToFileURL(path.join(web, 'index.html')).href });
+            await call('Page.navigate', { url: process.argv.includes('--preoficial') ? 'http://127.0.0.1:5500/' : pathToFileURL(path.join(web, 'index.html')).href });
             await wait(500);
             await until(() => evaluate("document.readyState === 'complete'" +
                 (scripts ? " && typeof initCinematicIntro === 'function'" : '')), 'local page ready');
@@ -136,7 +143,14 @@ async function main() {
         await call('DOM.enable');
         await call('CSS.enable');
         await call('Network.enable');
-        await call('Network.setBlockedURLs', { urls: ['https://*', 'http://*'] });
+        await call('Log.enable');
+        await call('Network.setBlockedURLs', { urls: process.argv.includes('--preoficial') ? ['https://*'] : ['https://*', 'http://*'] });
+        if(process.argv.includes('--preoficial')) {
+            await require(process.argv.includes('--sync-action') ? './sync-publish.cjs' : './preoficial.cjs')({call,evaluate,navigate,until,screenshot,profile,web});
+            assert.deepEqual(errors, []);
+            await call('Browser.close');
+            return;
+        }
         if(process.argv.includes('--phase53-motion')) {
             await require('./phase53-motion.cjs')({call,evaluate,navigate,until,screenshot,profile,web});
             assert.deepEqual(errors, []);
@@ -495,32 +509,11 @@ async function main() {
         assert.equal(await evaluate("document.querySelector('.phone-story').getAttribute('style')"), pose);
         assert.equal(await evaluate("document.querySelector('.hero-phone').getAnimations({subtree:true}).length"), 0);
         await evaluate("document.querySelector('#admin-rut').value='demo'; document.querySelector('#admin-pass').value='demo'; document.querySelector('#admin-login-form').requestSubmit()");
-        assert.equal(await evaluate("document.querySelector('#admin-dashboard').hidden"), false);
-        assert.equal(await evaluate('document.activeElement.id'), 'admin-dashboard-title');
-        await screenshot('admin');
-        for (const tab of ['horarios','salas','usuarios','anuncios']) {
-            await evaluate(`document.querySelector('#tab-button-${tab}').click()`);
-            assert.equal(await evaluate(`document.querySelector('#tab-${tab}').hidden`), false);
-        }
-        await evaluate("document.querySelector('#demo-announcement-title').value='Prueba'; document.querySelector('#demo-announcement-body').value='Comunicado de prueba'; document.querySelector('#tab-anuncios form').requestSubmit()");
-        assert((await evaluate("document.querySelector('#tab-anuncios [role=status]').textContent")).includes('Demostraci'));
-        await evaluate("document.querySelector('#tab-button-horarios').click(); document.querySelector('#demo-sync-schedule').click()");
-        assert((await evaluate("document.querySelector('#schedule-demo-status').textContent")).includes('no se sincronizaron'));
-        const sample = path.join(profile, 'horarios-demo.csv');
-        fs.writeFileSync(sample, 'curso,asignatura\n3A,Ejemplo\n');
-        const root = await call('DOM.getDocument');
-        const upload = await call('DOM.querySelector', { nodeId:root.root.nodeId, selector:'#file-upload' });
-        await call('DOM.setFileInputFiles', { nodeId:upload.nodeId, files:[sample] });
-        assert((await evaluate("document.querySelector('#file-upload-status').textContent")).includes('horarios-demo.csv'));
-        await evaluate("document.querySelector('#tab-button-salas').click(); document.querySelector('#demo-map-name').value='Prueba'; document.querySelector('#tab-salas form').requestSubmit()");
-        assert((await evaluate("document.querySelector('#tab-salas [role=status]').textContent")).includes('no se guardaron'));
-        await evaluate("document.querySelector('#tab-button-usuarios').click(); document.querySelector('#demo-user-search').value='Director'; document.querySelector('#demo-search-form').requestSubmit()");
-        assert((await evaluate("document.querySelector('#demo-search-status').textContent")).includes('1 resultado'));
-        await evaluate("document.querySelector('#tab-button-anuncios').focus()");
-        await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'ArrowRight' });
-        assert.equal(await evaluate('document.activeElement.id'), 'tab-button-horarios');
-        await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape' });
+        await until(() => evaluate("!document.querySelector('#admin-login-form button[type=submit]').disabled"), 'offline login');
         assert(await evaluate("document.querySelector('#admin-dashboard').hidden"));
+        assert.equal(await evaluate("document.querySelectorAll('.admin-tab-btn:disabled').length"),3);
+        await screenshot('admin-login');
+        await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape' });
         assert.equal(await evaluate("document.body.style.overflow"), '');
         assert(!await evaluate("document.querySelector('#main-content').inert"));
         assert(!await evaluate("document.body.classList.contains('cinema-paused')"));
@@ -603,7 +596,7 @@ async function main() {
         assert.equal(await evaluate("document.querySelectorAll('.capture-link').length"),3);
         assert.equal(await evaluate("document.querySelectorAll('.story-scene').length"),5);
         assert.deepEqual(errors, []);
-        console.log('PASS: GSAP pin/scrub, reversible poses, still state, crossfades, scenes, loader, admin/forms/focus/file, RUT, menu, public map removal, responsive, reduced motion, no-JS, UTF-8.');
+        console.log('PASS: GSAP pin/scrub, reversible poses, still state, crossfades, scenes, loader, authenticated admin boundary/focus, RUT, menu, public map removal, responsive, reduced motion, no-JS, UTF-8.');
         await call('Browser.close');
     } finally {
         ws?.close();

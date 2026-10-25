@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 module.exports=async function({call,evaluate,navigate,until,screenshot,profile,web}) {
-    const out=path.join(web,'review/phase53/motion');fs.mkdirSync(out,{recursive:true});
+    const out=path.resolve(web,'../.local/review/phase53/motion');fs.mkdirSync(out,{recursive:true});
     const report={};
     const frame=()=>evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
     const settle=async()=>{await frame();await until(()=>evaluate("ScrollTrigger.getAll().every(t=>!t.getTween()?.isActive?.())"),'All scrub motion settles');};

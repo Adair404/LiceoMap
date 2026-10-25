@@ -228,6 +228,7 @@ function setPageRegionsInert(isInert) {
 
 function setDashboardVisible(isVisible) {
     if (!adminDashboard) return;
+    if (isVisible && !window.LiceoMapAdmin?.authorized) return;
     adminDashboard.hidden = !isVisible;
     setPageRegionsInert(isVisible);
     document.body.style.overflow = isVisible ? 'hidden' : previousBodyOverflow;
@@ -240,6 +241,7 @@ function setDashboardVisible(isVisible) {
 
 function closeDemoDialog() {
     if (!adminModal || adminModal.hidden) return;
+    window.LiceoMapAdmin?.cancelLogin();
     adminModal.hidden = true;
     setPageRegionsInert(false);
     document.body.style.overflow = previousBodyOverflow;
@@ -265,22 +267,44 @@ adminModal?.addEventListener('click', (event) => {
     if (event.target === adminModal) closeDemoDialog();
 });
 
-adminLoginForm?.addEventListener('submit', (event) => {
+adminLoginForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    adminModal.hidden = true;
-    setDashboardVisible(true);
-    document.getElementById('admin-user-name').textContent = 'Dirección / UTP';
-    document.getElementById('admin-login-status').textContent = '';
-    adminLoginForm.reset();
+    const status = document.getElementById('admin-login-status');
+    const button = adminLoginForm.querySelector('button[type="submit"]');
+    status.textContent = 'Verificando acceso…';
+    button.disabled = true;
+    try {
+        const user = await window.LiceoMapAdmin.login(
+            document.getElementById('admin-rut').value, document.getElementById('admin-pass').value);
+        if (!window.LiceoMapAdmin.authorized || adminModal.hidden) return;
+        document.getElementById('admin-user-name').textContent = `${user.nombre} ${user.apellido} · ${user.rol}`;
+        adminModal.hidden = true;
+        setDashboardVisible(true);
+        status.textContent = '';
+        adminLoginForm.reset();
+        await window.LiceoMapAdmin.refresh();
+    } catch (error) {
+        status.textContent = error.message;
+    } finally {
+        document.getElementById('admin-pass').value = '';
+        button.disabled = false;
+    }
 });
 
-btnLogoutAdmin?.addEventListener('click', () => setDashboardVisible(false));
+btnLogoutAdmin?.addEventListener('click', () => { window.LiceoMapAdmin.logout(); setDashboardVisible(false); });
+window.addEventListener('liceomap:session-ended', () => {
+    setDashboardVisible(false);
+    if (adminModal && !adminModal.hidden) {
+        setPageRegionsInert(true);
+        document.body.style.overflow = 'hidden';
+    }
+});
 
 document.addEventListener('keydown', (event) => {
     const currentTab = event.target.closest?.('[role="tab"]');
     if (currentTab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
         event.preventDefault();
-        const tabs = [...document.querySelectorAll('[role="tab"]')];
+        const tabs = [...document.querySelectorAll('[role="tab"]:not([disabled])')];
         const currentIndex = tabs.indexOf(currentTab);
         const nextIndex = event.key === 'Home'
             ? 0
@@ -293,6 +317,7 @@ document.addEventListener('keydown', (event) => {
 
     if (event.key === 'Escape') {
         if (adminDashboard && !adminDashboard.hidden) {
+            window.LiceoMapAdmin.logout();
             setDashboardVisible(false);
         } else {
             closeDemoDialog();
@@ -439,47 +464,4 @@ studentDemoForm?.addEventListener('submit', (event) => {
         studentDemoStatus.textContent = 'Revisa el RUT: debe tener 7 u 8 dígitos y un dígito verificador válido.';
     }
     studentDemoStatus.hidden = false;
-});
-
-document.querySelectorAll('.demo-form').forEach((form) => {
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const status = form.querySelector('[role="status"]');
-        if (status) status.textContent = form.dataset.demoMessage || 'Demostración: no se guardaron cambios.';
-    });
-});
-
-document.getElementById('demo-sync-schedule')?.addEventListener('click', () => {
-    const status = document.getElementById('schedule-demo-status');
-    if (status) status.textContent = 'Demostración: archivo revisado; no se sincronizaron horarios.';
-});
-
-document.getElementById('file-upload')?.addEventListener('change', (event) => {
-    const status = document.getElementById('file-upload-status');
-    if (status) {
-        status.textContent = event.currentTarget.files?.length
-            ? `Archivo seleccionado: ${event.currentTarget.files[0].name}`
-            : '';
-    }
-});
-
-document.getElementById('demo-search-form')?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const query = document.getElementById('demo-user-search')?.value.trim().toLocaleLowerCase() ?? '';
-    const rows = [...document.querySelectorAll('.admin-table tbody tr')];
-    let visibleCount = 0;
-    rows.forEach((row) => {
-        const isMatch = row.textContent.toLocaleLowerCase().includes(query);
-        row.hidden = !isMatch;
-        if (isMatch) visibleCount += 1;
-    });
-    const status = document.getElementById('demo-search-status');
-    if (status) status.textContent = `${visibleCount} resultado(s).`;
-});
-
-document.querySelectorAll('.admin-table .btn-text').forEach((button) => {
-    button.addEventListener('click', () => {
-        const status = document.getElementById('demo-search-status');
-        if (status) status.textContent = 'Ficha seleccionada.';
-    });
 });
