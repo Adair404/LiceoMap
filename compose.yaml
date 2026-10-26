@@ -1,0 +1,17 @@
+name: liceomap-preoficial
+services:
+  mariadb:
+    image: mariadb:11.4.13
+    env_file: .local/mariadb.env
+    ports:
+      - "127.0.0.1:3308:3306"
+    command: ["--default-time-zone=+00:00", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - preoficial_mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+volumes:
+  preoficial_mariadb:

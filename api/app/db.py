@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 
 import pymysql
@@ -17,6 +17,10 @@ def get_db():
         charset="utf8mb4",
         cursorclass=pymysql.cursors.DictCursor,
         autocommit=True,
+        connect_timeout=5,
+        read_timeout=10,
+        write_timeout=10,
+        init_command="SET time_zone = '+00:00'",
     )
     try:
         yield conn
@@ -30,7 +34,9 @@ def _clean_value(value):
         return f"{total // 3600:02d}:{total % 3600 // 60:02d}"
     if isinstance(value, Decimal):
         return float(value)
-    if isinstance(value, (datetime, date)):
+    if isinstance(value, datetime):
+        return value.replace(tzinfo=timezone.utc).isoformat()
+    if isinstance(value, date):
         return value.isoformat()
     return value
 

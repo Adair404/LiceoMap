@@ -2,8 +2,12 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel, Field, ConfigDict
+import pymysql
 
 from . import config
 from .db import get_db, query, query_one
@@ -14,15 +18,29 @@ from .security import (
     limiter,
     require_roles,
     verify_password,
+    decode_token,
 )
+from .announcements import router as announcements_router
 
 app = FastAPI(title="LiceoMap API", version="0.1.0")
+app.include_router(announcements_router)
+
+
+@app.exception_handler(pymysql.MySQLError)
+async def database_error(request, exc):
+    return JSONResponse(status_code=503, content={'detail': 'Servicio de datos no disponible. Intenta nuevamente.'})
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request, exc):
+    # Pydantic input/ctx can contain passwords, SQL payloads, or private messages.
+    return JSONResponse(status_code=422, content={'detail': 'Datos inválidos. Revisa los campos enviados.'})
 
 if config.CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=config.CORS_ORIGINS,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE"],
         allow_headers=["Authorization", "Content-Type"],
     )
 
@@ -31,15 +49,9 @@ PUBLISHER_ROLES = ("dev", "utp", "inspectoria")
 
 
 class LoginRequest(BaseModel):
-    rut: str = Field(max_length=16)
+    model_config = ConfigDict(extra='forbid')
+    rut: str = Field(min_length=1, max_length=16)
     password: str = Field(min_length=1, max_length=128)
-
-
-class AnnouncementCreate(BaseModel):
-    titulo: str = Field(min_length=1, max_length=150)
-    contenido: str = Field(min_length=1, max_length=5000)
-    prioridad: str = Field(default="INFORMATIVO", pattern="^(INFORMATIVO|URGENTE|RECORDATORIO)$")
-    id_curso: str | None = Field(default=None, max_length=10)
 
 
 @app.get("/health")
@@ -51,8 +63,12 @@ def health(conn=Depends(get_db)):
 # ---------------------------------------------------------------- Autenticación
 @app.post("/auth/login")
 def login(payload: LoginRequest, request: Request, conn=Depends(get_db)):
+    ip = request.client.host if request.client else 'desconocida'
+    if limiter.blocked('ip:' + ip):
+        raise HTTPException(429, 'Demasiados intentos. Espera unos minutos.')
     rut = normalize_rut(payload.rut)
     if rut is None:
+        limiter.register_fail('ip:' + ip)
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "RUT inválido")
 
     ip_key = f"{request.client.host if request.client else 'desconocida'}|{rut}"
@@ -69,12 +85,22 @@ def login(payload: LoginRequest, request: Request, conn=Depends(get_db)):
     if not verify_password(payload.password, user["password_hash"] if user else None):
         limiter.register_fail(ip_key)
         limiter.register_fail(rut)
+        limiter.register_fail('ip:' + ip)
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "RUT o contraseña incorrectos")
 
     limiter.reset(ip_key)
     limiter.reset(rut)
     public = {k: user[k] for k in ("id_usuario", "rut", "nombre", "apellido", "rol")}
-    return {"access_token": create_token(user["id_usuario"], user["rol"]), "token_type": "bearer", "usuario": public}
+    return {"access_token": create_token(user["id_usuario"], user["rol"], conn), "token_type": "bearer", "usuario": public,
+            'expires_in': config.JWT_EXPIRE_MINUTES * 60}
+
+
+@app.post('/auth/logout', status_code=204)
+def logout(user=Depends(current_user), credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()), conn=Depends(get_db)):
+    payload = decode_token(credentials.credentials)
+    with conn.cursor() as cur:
+        cur.execute('UPDATE auth_sessions SET revocada=TRUE WHERE id_sesion=%s AND id_usuario=%s',
+                    (payload['jti'], user['id_usuario']))
 
 
 @app.get("/me")
@@ -82,7 +108,7 @@ def me(user: dict = Depends(current_user), conn=Depends(get_db)):
     courses = query(
         conn,
         "SELECT c.id_curso, c.nombre FROM curso_alumno ca JOIN cursos c ON c.id_curso = ca.id_curso "
-        "WHERE ca.id_alumno = %s",
+        "WHERE ca.id_alumno = %s AND c.activo=TRUE",
         (user["id_usuario"],),
     )
     return {**user, "cursos": courses}
@@ -159,11 +185,12 @@ _SCHEDULE_SQL = (
 
 
 @app.get("/cursos/{course_id}/horarios")
-def course_schedule(course_id: str, user: dict = Depends(current_user), conn=Depends(get_db)):
+def course_schedule(course_id: str, user: dict = Depends(require_roles('alumno', *STAFF_ROLES)), conn=Depends(get_db)):
     if user["rol"] == "alumno":
         enrolled = query_one(
             conn,
-            "SELECT 1 AS ok FROM curso_alumno WHERE id_alumno = %s AND id_curso = %s",
+            "SELECT 1 AS ok FROM curso_alumno ca JOIN cursos c ON c.id_curso=ca.id_curso "
+            "WHERE ca.id_alumno = %s AND ca.id_curso = %s AND c.activo=TRUE",
             (user["id_usuario"], course_id),
         )
         if enrolled is None:
@@ -184,39 +211,7 @@ def teacher_schedule(
     return query(conn, _SCHEDULE_SQL + "WHERE h.id_profesor = %s ORDER BY h.dia_semana, h.hora_inicio", (teacher_id,))
 
 
-# ---------------------------------------------------------------- Anuncios
-@app.get("/anuncios")
-def list_announcements(user: dict = Depends(current_user), conn=Depends(get_db)):
-    sql = (
-        "SELECT a.id_anuncio, a.id_curso, a.titulo, a.contenido, a.prioridad, a.fecha_publicacion, "
-        "CONCAT(u.nombre, ' ', u.apellido) AS autor "
-        "FROM anuncios a JOIN usuarios u ON u.id_usuario = a.id_autor WHERE a.publicado = TRUE"
-    )
-    params: tuple = ()
-    if user["rol"] == "alumno":
-        sql += " AND (a.id_curso IS NULL OR a.id_curso IN (SELECT id_curso FROM curso_alumno WHERE id_alumno = %s))"
-        params = (user["id_usuario"],)
-    return query(conn, sql + " ORDER BY a.fecha_publicacion DESC, a.id_anuncio DESC", params)
-
-
-@app.post("/anuncios", status_code=status.HTTP_201_CREATED)
-def create_announcement(
-    payload: AnnouncementCreate,
-    user: dict = Depends(require_roles(*PUBLISHER_ROLES)),
-    conn=Depends(get_db),
-):
-    if payload.id_curso is not None and (
-        query_one(conn, "SELECT 1 AS ok FROM cursos WHERE id_curso = %s", (payload.id_curso,)) is None
-    ):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Curso no encontrado")
-    with conn.cursor() as cur:
-        cur.execute(
-            "INSERT INTO anuncios (id_curso, id_autor, titulo, contenido, prioridad) VALUES (%s, %s, %s, %s, %s)",
-            (payload.id_curso, user["id_usuario"], payload.titulo, payload.contenido, payload.prioridad),
-        )
-        return {"id_anuncio": cur.lastrowid}
-
-
+# Cliente de diagnóstico conservado de upstream; usa la misma API y autenticación.
 _TEST_CLIENT = Path(__file__).resolve().parent.parent / "test_client"
 if _TEST_CLIENT.is_dir():
     app.mount("/test", StaticFiles(directory=_TEST_CLIENT, html=True), name="test_client")

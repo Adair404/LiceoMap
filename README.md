@@ -4,10 +4,14 @@ Plataforma móvil y web de navegación interactiva y gestión de horarios para l
 
 ---
 
+Integración preoficial WEB + FastAPI + MariaDB + Android: instalación, arranque,
+pruebas y estado verificado en [docs/PREOFICIAL_INTEGRACION.md](docs/PREOFICIAL_INTEGRACION.md).
+
 ## 📁 Estructura del Repositorio
 
-* `android/`: Proyecto de la aplicación nativa Android (Java).
-* `database/`: Scripts SQL para la base de datos MariaDB (`colegio_db`).
+* `android/`: Aplicación Kotlin, Jetpack Compose, Material 3 y MVVM.
+* `api/`: FastAPI con autenticación, permisos, horarios y anuncios.
+* `database/`: Esquema MariaDB y migraciones; bases locales dedicadas de desarrollo y pruebas.
 * `design/`: Recursos gráficos, mapa de referencia e insumos vectoriales SVG (Inkscape).
 * `docs/`: Documentación oficial, definición de roles (`01-equipo.md`) y documentos del proyecto.
 * `web/`: Portal web institucional y visor interactivo (HTML/CSS).
