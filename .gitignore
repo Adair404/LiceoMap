@@ -25,6 +25,7 @@ local.properties
 !.env.*.example
 .local/
 .venv/
+api/.venv/
 venv/
 __pycache__/
 *.py[cod]

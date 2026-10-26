@@ -1,7 +1,10 @@
+from pathlib import Path
+
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field, ConfigDict
 import pymysql
@@ -208,3 +211,7 @@ def teacher_schedule(
     return query(conn, _SCHEDULE_SQL + "WHERE h.id_profesor = %s ORDER BY h.dia_semana, h.hora_inicio", (teacher_id,))
 
 
+# Cliente de diagnóstico conservado de upstream; usa la misma API y autenticación.
+_TEST_CLIENT = Path(__file__).resolve().parent.parent / "test_client"
+if _TEST_CLIENT.is_dir():
+    app.mount("/test", StaticFiles(directory=_TEST_CLIENT, html=True), name="test_client")

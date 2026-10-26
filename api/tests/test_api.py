@@ -7,14 +7,14 @@ from app.main import app
 from app.rut import check_digit, normalize_rut
 from conftest import ACCOUNTS
 
-USERS = {
-    "dev": ("20100001-7", "Dev2026!"),
-    "utp": ("20100002-5", "Utp2026!"),
-    "inspectoria": ("20100003-3", "Insp2026!"),
-    "profesor": ("20100004-1", "Prof2026!"),
-    "alumno": ("20100006-8", "Alum2026!"),
+USER_RUTS = {
+    "dev": "20100001-7",
+    "utp": "20100002-5",
+    "inspectoria": "20100003-3",
+    "profesor": "20100004-1",
+    "alumno": "20100006-8",
 }
-USERS = {role: (rut, ACCOUNTS[rut]) for role, (rut, _) in USERS.items()}
+USERS = {role: (rut, ACCOUNTS[rut]) for role, rut in USER_RUTS.items()}
 
 
 @pytest.fixture(scope="module")

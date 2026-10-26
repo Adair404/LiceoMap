@@ -56,7 +56,7 @@ Para asegurar la comunicación directa entre el código Android en Java y el arc
 
 La persistencia de datos del sistema gestiona la autenticación de perfiles, mapeo vectorial, grilla horaria y comunicaciones institucionales:
 
-* **Esquema y Scripts SQL:** El modelo relacional detallado (tablas `usuarios`, `salas`, `horarios`, `anuncios`, llaves foráneas y datos sintéticos de prueba) se encuentra centralizado en los scripts de la carpeta [`BD/`](../BD/database.sql).
+* **Esquema y Scripts SQL:** El modelo relacional detallado (tablas `usuarios`, `espacios`, `zonas`, `horarios`, `bloques_horarios`, `anuncios`, llaves foráneas y datos sintéticos de prueba) se encuentra en [`database/database.sql`](../database/database.sql); los cambios incrementales están en `database/migrations/`. La API de acceso y sus credenciales de prueba se describen en [`docs/api.md`](api.md).
 
 ---
 

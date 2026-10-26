@@ -152,3 +152,34 @@ El desarrollo de LiceoMap ha permitido al equipo enfrentarse a diferentes desaf�
 A medida que el proyecto ha avanzado, la idea inicial se ha ido transformando en una propuesta más completa, incorporando nuevas funciones, mejoras visuales y una planificación más clara de lo que se espera conseguir.
 
 El equipo considera que LiceoMap tiene potencial para ser una herramienta que facilite la orientación dentro del establecimiento y ayude a estudiantes y profesores en su día a día.
+
+## 12. Registro de avances de las últimas dos semanas
+
+**Período:** 3 al 17 de octubre de 2026 (aproximadamente).
+
+### Actualización del logo oficial
+
+Durante estas últimas dos semanas, el equipo actualizó el logo de LiceoMap, eligiendo un nuevo diseño que será utilizado como imagen oficial del proyecto. Este logo representa la identidad de nuestra aplicación y utiliza principalmente los colores azul, blanco y tonos oscuros.
+
+### Cambio de colores de la página web
+
+Debido a la actualización del logo, el equipo decidió modificar los colores de la página web para que coincidan con el nuevo diseño. Con esto buscamos que la aplicación tenga una apariencia más uniforme y que sus elementos visuales mantengan el mismo estilo. Estos cambios todavía están pendientes de realizar.
+
+### Avance del mapa del establecimiento
+
+El mapa del liceo ha tenido avances importantes y actualmente se encuentra casi terminado. Nuestro siguiente objetivo es incorporarlo tanto en la aplicación web como en la aplicación móvil, para que los estudiantes puedan consultar las ubicaciones de las salas.
+
+### Desarrollo de la aplicación móvil
+
+El equipo comenzó a trabajar en el desarrollo de la aplicación móvil utilizando Android Studio. Actualmente continuamos construyendo esta versión de LiceoMap para que los estudiantes también puedan acceder a sus funciones desde sus celulares.
+
+### Trabajo con la base de datos
+
+Estamos trabajando con MariaDB/MySQL para organizar y gestionar la información que utilizará LiceoMap. Esto forma parte del desarrollo del sistema y será importante para manejar los datos relacionados con las salas, cursos y horarios.
+
+### Próximos pasos
+
+- Aplicar los colores del nuevo logo a la página web.
+- Terminar e incorporar el mapa en ambas versiones.
+- Continuar desarrollando la aplicación móvil.
+- Avanzar en la integración y las pruebas de la base de datos.

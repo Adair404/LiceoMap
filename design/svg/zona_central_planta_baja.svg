@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650" viewBox="0 0 1000 650"
+     role="img" aria-labelledby="title description">
+  <title id="title">Zona central - PLANTA BAJA</title>
+  <desc id="description">Esquema provisional de salas y escaleras trazado a partir del croquis del equipo. Las posiciones de las salas se repiten en ambos niveles, pero sus nombres y medidas aún deben confirmarse.</desc>
+  <defs>
+    <style>
+      text { font-family: system-ui, "Segoe UI", sans-serif; fill: #183246; }
+      .on-dark { fill: #fff !important; }
+      .header { fill: #1f3a5f; }
+      .walk { fill: #e9eff2; stroke: #b5c4cd; stroke-width: 2; }
+      .floor { fill: #e4ebef; stroke: #c0cbd1; stroke-width: 2; }
+      .wing { fill: #dce7ed; stroke: #536f81; stroke-width: 3; }
+      .room { fill: #fff; stroke: #cf554b; stroke-width: 4; }
+      .room-alt { fill: #fff8f5; stroke: #cf554b; stroke-width: 4; }
+      .block-label { fill: #1f3a5f; font-size: 20px; font-weight: 850; text-anchor: middle; }
+      .room-label { font-size: 15px; font-weight: 750; text-anchor: middle; }
+      .room-code { font-size: 14px; font-weight: 850; text-anchor: middle; fill: #a43c35; }
+      .note { fill: #4b6577; font-size: 15px; font-weight: 650; }
+      .stair-base { fill: #29343b; stroke: #10191e; stroke-width: 2; }
+      .tread { stroke: #fff; stroke-width: 3; }
+      .stair-arrow { fill: none; stroke: #fff; stroke-width: 3; }
+    </style>
+    <marker id="up-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0 0L9 4.5L0 9Z" fill="#fff"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="650" fill="#f2f6f8"/>
+  <rect class="header" x="30" y="24" width="940" height="68" rx="16"/>
+  <text class="on-dark" x="500" y="67" text-anchor="middle" font-size="29" font-weight="900">ZONA CENTRAL · PLANTA BAJA</text>
+  <text class="note" x="500" y="122" text-anchor="middle">Esquema provisional basado en el croquis · los recintos aún no tienen nombre definitivo</text>
+
+  <rect id="planta_continua" class="floor" x="45" y="145" width="910" height="394" rx="12"/>
+
+  <g transform="translate(0, 0)">
+  <g id="sector_j">
+    <rect class="wing" x="70" y="198" width="135" height="292" rx="12"/>
+    <text class="block-label" x="137" y="191">J</text>
+    <rect id="sala_provisional_planta_baja_01" class="room" x="84" y="211" width="107" height="78" rx="7"/>
+    <rect id="sala_provisional_planta_baja_02" class="room-alt" x="84" y="300" width="107" height="78" rx="7"/>
+    <rect id="sala_provisional_planta_baja_03" class="room" x="84" y="389" width="107" height="87" rx="7"/>
+  </g>
+  <g id="sector_b">
+    <rect class="wing" x="285" y="198" width="350" height="142" rx="12"/>
+    <text class="block-label" x="460" y="191">B</text>
+    <rect id="sala_provisional_planta_baja_04" class="room" x="300" y="211" width="96" height="55" rx="7"/>
+    <rect id="sala_provisional_planta_baja_05" class="room-alt" x="409" y="211" width="96" height="55" rx="7"/>
+    <rect id="sala_provisional_planta_baja_06" class="room" x="518" y="211" width="102" height="55" rx="7"/>
+    <rect id="sala_provisional_planta_baja_07" class="room-alt" x="300" y="278" width="150" height="48" rx="7"/>
+    <rect id="sala_provisional_planta_baja_08" class="room" x="463" y="278" width="157" height="48" rx="7"/>
+  </g>
+  <g id="sector_intermedio">
+    <rect id="sala_provisional_planta_baja_13" class="room" x="285" y="356" width="142" height="62" rx="7"/>
+    <rect id="sala_provisional_planta_baja_14" class="room-alt" x="439" y="356" width="196" height="62" rx="7"/>
+    <rect id="sala_provisional_planta_baja_15" class="room-alt" x="285" y="432" width="118" height="58" rx="7"/>
+    <rect id="sala_provisional_planta_baja_16" class="room" x="415" y="432" width="220" height="58" rx="7"/>
+  </g>
+  <g id="sector_d">
+    <rect class="wing" x="700" y="198" width="230" height="142" rx="12"/>
+    <text class="block-label" x="815" y="191">D</text>
+    <rect id="sala_provisional_planta_baja_17" class="room" x="714" y="211" width="91" height="116" rx="7"/>
+    <rect id="sala_provisional_planta_baja_18" class="room-alt" x="823" y="211" width="93" height="116" rx="7"/>
+  </g>
+  <g id="sector_c">
+    <rect class="wing" x="700" y="360" width="230" height="130" rx="12"/>
+    <text class="block-label" x="815" y="353">C</text>
+    <rect id="sala_provisional_planta_baja_19" class="room-alt" x="714" y="373" width="91" height="103" rx="7"/>
+    <rect id="sala_provisional_planta_baja_20" class="room" x="823" y="373" width="93" height="103" rx="7"/>
+  </g>
+  </g>
+
+  <!-- Each room group has its own stair; opposing flights share each footprint. -->
+  <g id="escalera_provisional_planta_baja_01" transform="translate(-10, 0)">
+    <rect class="stair-base" x="214" y="214" width="46" height="136" rx="5"/>
+    <path class="tread" d="M217 225H257M217 236H257M217 247H257M217 258H257M217 269H257M217 280H257M217 291H257M217 302H257M217 313H257M217 324H257M217 335H257"/>
+    <path class="stair-arrow" d="M226 337V231" marker-end="url(#up-arrow)"/>
+    <path class="stair-arrow" d="M248 230V336" marker-end="url(#up-arrow)"/>
+  </g>
+  <g id="escalera_provisional_planta_baja_02" transform="translate(20, 0)">
+    <rect class="stair-base" x="645" y="214" width="46" height="136" rx="5"/>
+    <path class="tread" d="M648 225H688M648 236H688M648 247H688M648 258H688M648 269H688M648 280H688M648 291H688M648 302H688M648 313H688M648 324H688M648 335H688"/>
+    <path class="stair-arrow" d="M657 337V231" marker-end="url(#up-arrow)"/>
+    <path class="stair-arrow" d="M679 230V336" marker-end="url(#up-arrow)"/>
+  </g>
+
+  <g id="room_id_legend" transform="translate(0, 0)">
+    <rect class="room" x="70" y="570" width="36" height="28" rx="4"/>
+    <text class="note" x="118" y="590">Sala provisional · esquema aproximado</text>
+    <rect class="stair-base" x="541" y="566" width="28" height="36" rx="4"/>
+    <path class="tread" d="M546 570V598M553 570V598M560 570V598"/>
+    <text class="note" x="581" y="590">Dos tramos opuestos, misma huella</text>
+    <text class="note" x="70" y="622">Piso continuo, sin pasillos marcados; recintos y medidas provisionales.</text>
+  </g>
+</svg>

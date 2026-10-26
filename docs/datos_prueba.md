@@ -1,6 +1,10 @@
 > Referencia histórica importada de origin/main. Las credenciales de ejemplo
 > ya no son válidas en las bases locales integradas. Consultar
 > [PREOFICIAL_INTEGRACION.md](PREOFICIAL_INTEGRACION.md) para el arranque actual.
+> Las cuentas locales usan contraseñas aleatorias en `.local/*.accounts.json`,
+> archivos privados ignorados por Git. La cuenta local `20100008-4` está inactiva
+> para verificar el rechazo de acceso. No reejecutar el generador ni las migraciones
+> históricas 001–003 sobre bases existentes para recuperar estas contraseñas.
 
 # Datos de prueba (sintéticos)
 
