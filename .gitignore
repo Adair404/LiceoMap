@@ -44,3 +44,12 @@ android/.kotlin/
 *.db-journal
 *.p12
 *.pem
+
+# Documentos personales conservados en disco, excluidos de nuevas publicaciones
+/docs/2026-10-05T054618Z-1112181-application.pdf
+/docs/BASES OFICIALES DEL CONCURSO OLIMPIADAS vac.docx
+
+# Horarios y preferencias personales de la preparación local
+/design/Horario*
+/database/imports/*.revision.json
+/docs/preparacion_demo_privada.md

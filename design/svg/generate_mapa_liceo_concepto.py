@@ -6,7 +6,7 @@ from pathlib import Path
 OUTPUT = Path(__file__).with_name("mapa_liceo_concepto.svg")
 
 SVG = """<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="880" height="1320" viewBox="0 0 880 1320"
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="1350" viewBox="0 0 920 1350"
      role="img" aria-labelledby="title description">
   <title id="title">Mapa orientativo del Liceo B-4 Antonio Varas de la Barra</title>
   <desc id="description">Vista simplificada basada en el plano arquitectónico. Calle Alfredo Thomas queda al norte, Avenida Loa al sur. Los bloques y patios conservan su distribución general; confirme los nombres y accesos en terreno.</desc>
@@ -17,8 +17,8 @@ SVG = """<?xml version="1.0" encoding="UTF-8"?>
       .building text { stroke: none; }
       .road { fill: #12243a; }
       .site { fill: #0b1728; stroke: #35587d; stroke-width: 4; }
-      .walk { fill: #14263d; stroke: #294663; stroke-width: 2; }
-      .queue-walk { fill: #0a84ff; stroke: #35587d; stroke-width: 2; }
+      .walk { fill: #14263d; stroke: #4f7aa3; stroke-width: 3; }
+      .queue-walk { fill: #0a84ff; stroke: #6fa3d1; stroke-width: 3; }
       .building { stroke: #24486d; stroke-width: 4; }
       .room { fill: #fff; stroke: #6685a7; stroke-width: 2; }
       .room-alt { fill: #eaf3ff; stroke: #6685a7; stroke-width: 2; }
@@ -51,54 +51,104 @@ SVG = """<?xml version="1.0" encoding="UTF-8"?>
     <marker id="arrow" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
       <path d="M0 0L10 5L0 10Z" fill="#168dff"/>
     </marker>
+    <pattern id="malla_reja" width="6" height="6" patternUnits="userSpaceOnUse">
+      <path d="M0 0L6 6M6 0L0 6" stroke="#dceeff" stroke-width="0.9"/>
+    </pattern>
   </defs>
 
-  <rect width="880" height="1320" fill="#07111f"/>
+  <rect width="920" height="1350" fill="#07111f"/>
 
   <!-- Orientation and street names make the plan readable without relying on color. -->
   <g id="orientacion">
-    <rect class="road" x="30" y="24" width="820" height="58" rx="14"/>
-    <text class="road-label" x="380" y="60" text-anchor="middle">CALLE ALFREDO THOMAS · NORTE</text>
-    <path d="M810 98V54" stroke="#f4f8ff" stroke-width="4" marker-end="url(#arrow)"/>
-    <text class="north" x="810" y="42" text-anchor="middle">N</text>
+    <rect class="road" x="30" y="24" width="860" height="58" rx="14"/>
+    <text class="road-label" x="420" y="60" text-anchor="middle">CALLE ALFREDO THOMAS · NORTE</text>
+    <path d="M850 98V54" stroke="#f4f8ff" stroke-width="4" marker-end="url(#arrow)"/>
+    <text class="north" x="850" y="42" text-anchor="middle">N</text>
   </g>
 
-  <rect id="recinto_liceo" class="site" x="30" y="98" width="820" height="1080" rx="22"/>
+  <path id="recinto_liceo" class="site" d="M52 98H801A22 22 0 0 1 823 120V538A22 22 0 0 1 801 560H702A22 22 0 0 0 680 582V1218A22 22 0 0 1 658 1240H52A22 22 0 0 1 30 1218V120A22 22 0 0 1 52 98Z"/>
+  <g id="contenido_desplazado_40" transform="translate(40 0)">
   <g id="circulaciones">
-    <path id="paso_peatonal_01" class="walk" d="M48 187H832V211H48Z"/>
-    <path id="paso_peatonal_02" class="walk" d="M48 426H532V451H48Z"/>
-    <path id="paso_peatonal_04" class="walk" d="M48 1032H832V1058H48Z"/>
-    <path id="paso_peatonal_05" class="walk" d="M163 190H188V426H163Z"/>
-    <path id="paso_peatonal_03" class="walk" d="M494 205H520V650H494Z"/>
-    <path id="paso_peatonal_07" class="walk" d="M48 650H832V676H48Z"/>
-    <path id="paso_peatonal_08_pasillo_porteria" class="walk" d="M148 676H176V900H210V1032H190V912H148Z"/>
+    <path id="paso_peatonal_01" class="walk" d="M48 187H783V211H48Z"/>
+    <path id="paso_peatonal_02" class="walk" d="M48 426H426V451H48Z"/>
+    <path id="paso_peatonal_07" class="walk" d="M48 660H640V686H48Z"/>
+    <path id="paso_peatonal_09_p02_p07" class="walk" d="M48 451H73V660H48Z"/>
+    <path id="paso_peatonal_12_p01_p02" class="walk" d="M48 211H73V426H48Z"/>
+    <path id="paso_peatonal_03" class="walk" d="M400 205H426V660H400Z"/>
+    <path id="paso_peatonal_08_pasillo_porteria" class="walk" d="M148 686H176V1112H148Z"/>
+  </g>
+
+  <g id="pasto_sobre_bloque_b" aria-label="Pasto y árboles sobre B">
+    <rect x="73" y="451" width="327" height="15" fill="#2f7d4f" opacity=".85"/>
+    <g fill="#1d5c38" stroke="#0f3a22" stroke-width="1">
+      <circle cx="340" cy="458.5" r="6"/>
+      <circle cx="362" cy="458.5" r="6"/>
+      <circle cx="384" cy="458.5" r="6"/>
+    </g>
+    <g fill="#4fae6f">
+      <circle cx="338.5" cy="457" r="2.2"/>
+      <circle cx="360.5" cy="457" r="2.2"/>
+      <circle cx="382.5" cy="457" r="2.2"/>
+    </g>
   </g>
 
   <!-- The central patio is the entire open quadrangle between the surrounding walkways. -->
-  <g transform="translate(0 -40)">
+  <g transform="translate(0 60)">
   <g id="patio_central">
-    <rect x="188" y="716" width="318" height="234" fill="#10233a"/>
-    <rect x="194" y="722" width="306" height="222" fill="url(#paving)"/>
-    <rect x="208" y="738" width="112" height="72" rx="6" fill="#162b46" stroke="#4f7193" stroke-width="2"/>
-    <rect x="330" y="738" width="112" height="72" rx="6" fill="#162b46" stroke="#4f7193" stroke-width="2"/>
-    <rect x="208" y="826" width="112" height="98" rx="6" fill="#162b46" stroke="#4f7193" stroke-width="2"/>
-    <rect x="330" y="826" width="112" height="98" rx="6" fill="#162b46" stroke="#4f7193" stroke-width="2"/>
-    <rect x="245" y="812" width="204" height="29" rx="11" fill="#0d315b"/>
-    <text class="block-name" x="347" y="833" text-anchor="middle">PATIO CENTRAL</text>
+    <rect x="176" y="626" width="290" height="324" fill="#10233a"/>
+    <rect x="182" y="632" width="284" height="312" fill="url(#paving)"/>
+    <rect id="patio_cuadro_temp_01" x="176" y="638" width="124" height="135" rx="6" fill="#162b46" stroke="#4f7193" stroke-width="2"/>
+    <g id="mesas_taca_taca_t1" transform="translate(238 686) scale(0.8) translate(-234 -705.5)" aria-label="Nueve mesas de taca-taca">
+      <g id="mesa_taca_taca_t1_01"><rect x="181" y="655.5" width="30" height="20" rx="2.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><rect x="183.5" y="658.0" width="25" height="15" rx="1.5" fill="#168dff"/><path d="M196 658.0V673.0" stroke="#dceeff" stroke-width=".8"/><circle cx="196" cy="665.5" r="2.8" fill="none" stroke="#dceeff" stroke-width=".8"/><g stroke="#17385f" stroke-width=".9" stroke-linecap="round"><path d="M187 658.5V672.5"/><path d="M193 658.5V672.5"/><path d="M199 658.5V672.5"/><path d="M205 658.5V672.5"/></g><g fill="#eaf3ff"><circle cx="187" cy="662.5" r="1.4"/><circle cx="187" cy="668.5" r="1.4"/><circle cx="193" cy="661.5" r="1.4"/><circle cx="193" cy="665.5" r="1.4"/><circle cx="193" cy="669.5" r="1.4"/><circle cx="199" cy="661.5" r="1.4"/><circle cx="199" cy="665.5" r="1.4"/><circle cx="199" cy="669.5" r="1.4"/><circle cx="205" cy="662.5" r="1.4"/><circle cx="205" cy="668.5" r="1.4"/></g></g>
+      <g id="mesa_taca_taca_t1_02"><rect x="219" y="655.5" width="30" height="20" rx="2.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><rect x="221.5" y="658.0" width="25" height="15" rx="1.5" fill="#168dff"/><path d="M234 658.0V673.0" stroke="#dceeff" stroke-width=".8"/><circle cx="234" cy="665.5" r="2.8" fill="none" stroke="#dceeff" stroke-width=".8"/><g stroke="#17385f" stroke-width=".9" stroke-linecap="round"><path d="M225 658.5V672.5"/><path d="M231 658.5V672.5"/><path d="M237 658.5V672.5"/><path d="M243 658.5V672.5"/></g><g fill="#eaf3ff"><circle cx="225" cy="662.5" r="1.4"/><circle cx="225" cy="668.5" r="1.4"/><circle cx="231" cy="661.5" r="1.4"/><circle cx="231" cy="665.5" r="1.4"/><circle cx="231" cy="669.5" r="1.4"/><circle cx="237" cy="661.5" r="1.4"/><circle cx="237" cy="665.5" r="1.4"/><circle cx="237" cy="669.5" r="1.4"/><circle cx="243" cy="662.5" r="1.4"/><circle cx="243" cy="668.5" r="1.4"/></g></g>
+      <g id="mesa_taca_taca_t1_03"><rect x="257" y="655.5" width="30" height="20" rx="2.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><rect x="259.5" y="658.0" width="25" height="15" rx="1.5" fill="#168dff"/><path d="M272 658.0V673.0" stroke="#dceeff" stroke-width=".8"/><circle cx="272" cy="665.5" r="2.8" fill="none" stroke="#dceeff" stroke-width=".8"/><g stroke="#17385f" stroke-width=".9" stroke-linecap="round"><path d="M263 658.5V672.5"/><path d="M269 658.5V672.5"/><path d="M275 658.5V672.5"/><path d="M281 658.5V672.5"/></g><g fill="#eaf3ff"><circle cx="263" cy="662.5" r="1.4"/><circle cx="263" cy="668.5" r="1.4"/><circle cx="269" cy="661.5" r="1.4"/><circle cx="269" cy="665.5" r="1.4"/><circle cx="269" cy="669.5" r="1.4"/><circle cx="275" cy="661.5" r="1.4"/><circle cx="275" cy="665.5" r="1.4"/><circle cx="275" cy="669.5" r="1.4"/><circle cx="281" cy="662.5" r="1.4"/><circle cx="281" cy="668.5" r="1.4"/></g></g>
+      <g id="mesa_taca_taca_t1_04"><rect x="181" y="695.5" width="30" height="20" rx="2.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><rect x="183.5" y="698.0" width="25" height="15" rx="1.5" fill="#168dff"/><path d="M196 698.0V713.0" stroke="#dceeff" stroke-width=".8"/><circle cx="196" cy="705.5" r="2.8" fill="none" stroke="#dceeff" stroke-width=".8"/><g stroke="#17385f" stroke-width=".9" stroke-linecap="round"><path d="M187 698.5V712.5"/><path d="M193 698.5V712.5"/><path d="M199 698.5V712.5"/><path d="M205 698.5V712.5"/></g><g fill="#eaf3ff"><circle cx="187" cy="702.5" r="1.4"/><circle cx="187" cy="708.5" r="1.4"/><circle cx="193" cy="701.5" r="1.4"/><circle cx="193" cy="705.5" r="1.4"/><circle cx="193" cy="709.5" r="1.4"/><circle cx="199" cy="701.5" r="1.4"/><circle cx="199" cy="705.5" r="1.4"/><circle cx="199" cy="709.5" r="1.4"/><circle cx="205" cy="702.5" r="1.4"/><circle cx="205" cy="708.5" r="1.4"/></g></g>
+      <g id="mesa_taca_taca_t1_05"><rect x="219" y="695.5" width="30" height="20" rx="2.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><rect x="221.5" y="698.0" width="25" height="15" rx="1.5" fill="#168dff"/><path d="M234 698.0V713.0" stroke="#dceeff" stroke-width=".8"/><circle cx="234" cy="705.5" r="2.8" fill="none" stroke="#dceeff" stroke-width=".8"/><g stroke="#17385f" stroke-width=".9" stroke-linecap="round"><path d="M225 698.5V712.5"/><path d="M231 698.5V712.5"/><path d="M237 698.5V712.5"/><path d="M243 698.5V712.5"/></g><g fill="#eaf3ff"><circle cx="225" cy="702.5" r="1.4"/><circle cx="225" cy="708.5" r="1.4"/><circle cx="231" cy="701.5" r="1.4"/><circle cx="231" cy="705.5" r="1.4"/><circle cx="231" cy="709.5" r="1.4"/><circle cx="237" cy="701.5" r="1.4"/><circle cx="237" cy="705.5" r="1.4"/><circle cx="237" cy="709.5" r="1.4"/><circle cx="243" cy="702.5" r="1.4"/><circle cx="243" cy="708.5" r="1.4"/></g></g>
+      <g id="mesa_taca_taca_t1_06"><rect x="257" y="695.5" width="30" height="20" rx="2.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><rect x="259.5" y="698.0" width="25" height="15" rx="1.5" fill="#168dff"/><path d="M272 698.0V713.0" stroke="#dceeff" stroke-width=".8"/><circle cx="272" cy="705.5" r="2.8" fill="none" stroke="#dceeff" stroke-width=".8"/><g stroke="#17385f" stroke-width=".9" stroke-linecap="round"><path d="M263 698.5V712.5"/><path d="M269 698.5V712.5"/><path d="M275 698.5V712.5"/><path d="M281 698.5V712.5"/></g><g fill="#eaf3ff"><circle cx="263" cy="702.5" r="1.4"/><circle cx="263" cy="708.5" r="1.4"/><circle cx="269" cy="701.5" r="1.4"/><circle cx="269" cy="705.5" r="1.4"/><circle cx="269" cy="709.5" r="1.4"/><circle cx="275" cy="701.5" r="1.4"/><circle cx="275" cy="705.5" r="1.4"/><circle cx="275" cy="709.5" r="1.4"/><circle cx="281" cy="702.5" r="1.4"/><circle cx="281" cy="708.5" r="1.4"/></g></g>
+      <g id="mesa_taca_taca_t1_07"><rect x="181" y="735.5" width="30" height="20" rx="2.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><rect x="183.5" y="738.0" width="25" height="15" rx="1.5" fill="#168dff"/><path d="M196 738.0V753.0" stroke="#dceeff" stroke-width=".8"/><circle cx="196" cy="745.5" r="2.8" fill="none" stroke="#dceeff" stroke-width=".8"/><g stroke="#17385f" stroke-width=".9" stroke-linecap="round"><path d="M187 738.5V752.5"/><path d="M193 738.5V752.5"/><path d="M199 738.5V752.5"/><path d="M205 738.5V752.5"/></g><g fill="#eaf3ff"><circle cx="187" cy="742.5" r="1.4"/><circle cx="187" cy="748.5" r="1.4"/><circle cx="193" cy="741.5" r="1.4"/><circle cx="193" cy="745.5" r="1.4"/><circle cx="193" cy="749.5" r="1.4"/><circle cx="199" cy="741.5" r="1.4"/><circle cx="199" cy="745.5" r="1.4"/><circle cx="199" cy="749.5" r="1.4"/><circle cx="205" cy="742.5" r="1.4"/><circle cx="205" cy="748.5" r="1.4"/></g></g>
+      <g id="mesa_taca_taca_t1_08"><rect x="219" y="735.5" width="30" height="20" rx="2.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><rect x="221.5" y="738.0" width="25" height="15" rx="1.5" fill="#168dff"/><path d="M234 738.0V753.0" stroke="#dceeff" stroke-width=".8"/><circle cx="234" cy="745.5" r="2.8" fill="none" stroke="#dceeff" stroke-width=".8"/><g stroke="#17385f" stroke-width=".9" stroke-linecap="round"><path d="M225 738.5V752.5"/><path d="M231 738.5V752.5"/><path d="M237 738.5V752.5"/><path d="M243 738.5V752.5"/></g><g fill="#eaf3ff"><circle cx="225" cy="742.5" r="1.4"/><circle cx="225" cy="748.5" r="1.4"/><circle cx="231" cy="741.5" r="1.4"/><circle cx="231" cy="745.5" r="1.4"/><circle cx="231" cy="749.5" r="1.4"/><circle cx="237" cy="741.5" r="1.4"/><circle cx="237" cy="745.5" r="1.4"/><circle cx="237" cy="749.5" r="1.4"/><circle cx="243" cy="742.5" r="1.4"/><circle cx="243" cy="748.5" r="1.4"/></g></g>
+      <g id="mesa_taca_taca_t1_09"><rect x="257" y="735.5" width="30" height="20" rx="2.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><rect x="259.5" y="738.0" width="25" height="15" rx="1.5" fill="#168dff"/><path d="M272 738.0V753.0" stroke="#dceeff" stroke-width=".8"/><circle cx="272" cy="745.5" r="2.8" fill="none" stroke="#dceeff" stroke-width=".8"/><g stroke="#17385f" stroke-width=".9" stroke-linecap="round"><path d="M263 738.5V752.5"/><path d="M269 738.5V752.5"/><path d="M275 738.5V752.5"/><path d="M281 738.5V752.5"/></g><g fill="#eaf3ff"><circle cx="263" cy="742.5" r="1.4"/><circle cx="263" cy="748.5" r="1.4"/><circle cx="269" cy="741.5" r="1.4"/><circle cx="269" cy="745.5" r="1.4"/><circle cx="269" cy="749.5" r="1.4"/><circle cx="275" cy="741.5" r="1.4"/><circle cx="275" cy="745.5" r="1.4"/><circle cx="275" cy="749.5" r="1.4"/><circle cx="281" cy="742.5" r="1.4"/><circle cx="281" cy="748.5" r="1.4"/></g></g>
+    </g>
+    <g id="mesas_ping_pong_t1" aria-label="Dos mesas de ping pong">
+      <g id="mesa_ping_pong_t1_01"><rect x="190" y="738" width="44" height="24" rx="2" fill="#168dff" stroke="#eaf3ff" stroke-width="1.5"/><path d="M192 750.0H232" stroke="#dceeff" stroke-width=".8"/><path d="M212.0 736V764" stroke="#17385f" stroke-width="1.6" stroke-linecap="round"/><path d="M212.0 738V762" stroke="#eaf3ff" stroke-width=".6" stroke-dasharray="1.5 1.5"/></g>
+      <g id="mesa_ping_pong_t1_02"><rect x="242" y="738" width="44" height="24" rx="2" fill="#168dff" stroke="#eaf3ff" stroke-width="1.5"/><path d="M244 750.0H284" stroke="#dceeff" stroke-width=".8"/><path d="M264.0 736V764" stroke="#17385f" stroke-width="1.6" stroke-linecap="round"/><path d="M264.0 738V762" stroke="#eaf3ff" stroke-width=".6" stroke-dasharray="1.5 1.5"/></g>
+    </g>
+    <rect id="patio_cuadro_temp_02" x="310" y="638" width="112" height="135" rx="6" fill="#162b46" stroke="#4f7193" stroke-width="2"/>
+    <rect id="patio_cuadro_temp_03" x="176" y="789" width="124" height="135" rx="6" fill="#162b46" stroke="#4f7193" stroke-width="2"/>
+    <g id="fuentes_arbustos_t3" transform="translate(-191 -783.5) scale(2)" aria-label="Nueve fuentes con arbustos">
+      <g id="fuente_t3_01" transform="translate(192 803) scale(0.9) translate(-192 -803)"><circle cx="192" cy="803" r="6.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><circle cx="192" cy="803" r="4.8" fill="#0f3a22"/><circle cx="190.4" cy="802.2" r="2.6" fill="#2f7d4f"/><circle cx="193.8" cy="801.8" r="2.3" fill="#4fae6f"/><circle cx="192.3" cy="804.8" r="2.4" fill="#1d5c38"/></g>
+      <g id="fuente_t3_02" transform="translate(209 803) scale(0.9) translate(-209 -803)"><circle cx="209" cy="803" r="6.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><circle cx="209" cy="803" r="4.8" fill="#0f3a22"/><circle cx="207.4" cy="802.2" r="2.6" fill="#2f7d4f"/><circle cx="210.8" cy="801.8" r="2.3" fill="#4fae6f"/><circle cx="209.3" cy="804.8" r="2.4" fill="#1d5c38"/></g>
+      <g id="fuente_t3_03" transform="translate(226 803) scale(0.9) translate(-226 -803)"><circle cx="226" cy="803" r="6.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><circle cx="226" cy="803" r="4.8" fill="#0f3a22"/><circle cx="224.4" cy="802.2" r="2.6" fill="#2f7d4f"/><circle cx="227.8" cy="801.8" r="2.3" fill="#4fae6f"/><circle cx="226.3" cy="804.8" r="2.4" fill="#1d5c38"/></g>
+      <g id="fuente_t3_04" transform="translate(192 820) scale(0.9) translate(-192 -820)"><circle cx="192" cy="820" r="6.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><circle cx="192" cy="820" r="4.8" fill="#0f3a22"/><circle cx="190.4" cy="819.2" r="2.6" fill="#2f7d4f"/><circle cx="193.8" cy="818.8" r="2.3" fill="#4fae6f"/><circle cx="192.3" cy="821.8" r="2.4" fill="#1d5c38"/></g>
+      <g id="fuente_t3_05" transform="translate(209 820) scale(0.9) translate(-209 -820)"><circle cx="209" cy="820" r="6.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><circle cx="209" cy="820" r="4.8" fill="#0f3a22"/><circle cx="207.4" cy="819.2" r="2.6" fill="#2f7d4f"/><circle cx="210.8" cy="818.8" r="2.3" fill="#4fae6f"/><circle cx="209.3" cy="821.8" r="2.4" fill="#1d5c38"/></g>
+      <g id="fuente_t3_06" transform="translate(226 820) scale(0.9) translate(-226 -820)"><circle cx="226" cy="820" r="6.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><circle cx="226" cy="820" r="4.8" fill="#0f3a22"/><circle cx="224.4" cy="819.2" r="2.6" fill="#2f7d4f"/><circle cx="227.8" cy="818.8" r="2.3" fill="#4fae6f"/><circle cx="226.3" cy="821.8" r="2.4" fill="#1d5c38"/></g>
+      <g id="fuente_t3_07" transform="translate(192 837) scale(0.9) translate(-192 -837)"><circle cx="192" cy="837" r="6.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><circle cx="192" cy="837" r="4.8" fill="#0f3a22"/><circle cx="190.4" cy="836.2" r="2.6" fill="#2f7d4f"/><circle cx="193.8" cy="835.8" r="2.3" fill="#4fae6f"/><circle cx="192.3" cy="838.8" r="2.4" fill="#1d5c38"/></g>
+      <g id="fuente_t3_08" transform="translate(209 837) scale(0.9) translate(-209 -837)"><circle cx="209" cy="837" r="6.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><circle cx="209" cy="837" r="4.8" fill="#0f3a22"/><circle cx="207.4" cy="836.2" r="2.6" fill="#2f7d4f"/><circle cx="210.8" cy="835.8" r="2.3" fill="#4fae6f"/><circle cx="209.3" cy="838.8" r="2.4" fill="#1d5c38"/></g>
+      <g id="fuente_t3_09" transform="translate(226 837) scale(0.9) translate(-226 -837)"><circle cx="226" cy="837" r="6.5" fill="#eaf3ff" stroke="#6685a7" stroke-width="1"/><circle cx="226" cy="837" r="4.8" fill="#0f3a22"/><circle cx="224.4" cy="836.2" r="2.6" fill="#2f7d4f"/><circle cx="227.8" cy="835.8" r="2.3" fill="#4fae6f"/><circle cx="226.3" cy="838.8" r="2.4" fill="#1d5c38"/></g>
+    </g>
+    <rect id="patio_cuadro_temp_04" x="310" y="789" width="112" height="135" rx="6" fill="#162b46" stroke="#4f7193" stroke-width="2"/>
+    <g id="etiquetas_temporales_patio" fill="#fff" stroke="#07111f" stroke-width="3" paint-order="stroke">
+    <text class="on-dark" x="238" y="712" text-anchor="middle" font-size="16" font-weight="900">T1</text>
+    <text class="on-dark" x="366" y="712" text-anchor="middle" font-size="16" font-weight="900">T2</text>
+    <text class="on-dark" x="238" y="862" text-anchor="middle" font-size="16" font-weight="900">T3</text>
+    <text class="on-dark" x="366" y="862" text-anchor="middle" font-size="16" font-weight="900">T4</text>
+    </g>
+    <rect x="245" y="766" width="204" height="29" rx="11" fill="#0d315b"/>
+    <text class="block-name" x="347" y="787" text-anchor="middle">PATIO CENTRAL</text>
   </g>
-  <path id="paso_peatonal_06_fila_comedor" class="queue-walk" d="M424 716H466V947H424Z"/>
+  <path id="paso_peatonal_06_fila_comedor" class="queue-walk" d="M424 626H452V947H424Z"/>
   </g>
 
   <!-- Block L faces Calle Alfredo Thomas. Room divisions are schematic. -->
   <g id="bloque_l" class="building">
-    <rect x="70" y="112" width="620" height="72" rx="8" fill="#17385f"/>
-    <path class="room" d="M78 120H189V176H78Z"/>
-    <path class="room-alt" d="M193 120H304V176H193Z"/>
-    <path class="room" d="M308 120H419V176H308Z"/>
-    <path class="room-alt" d="M423 120H534V176H423Z"/>
-    <path class="room" d="M538 120H682V176H538Z"/>
+    <rect x="40" y="112" width="743" height="72" rx="8" fill="#17385f"/>
+    <path class="room" d="M48.0 120H190.2V176H48.0Z"/>
+    <path class="room-alt" d="M194.2 120H336.4V176H194.2Z"/>
+    <path class="room" d="M340.4 120H482.6V176H340.4Z"/>
+    <path class="room-alt" d="M486.6 120H628.8V176H486.6Z"/>
+    <path class="room" d="M632.8 120H775.0V176H632.8Z"/>
   </g>
-  <text class="small-label" x="380" y="205" text-anchor="middle">L · PABELLÓN NORTE</text>
+  <text class="small-label" x="300" y="205" text-anchor="middle">L · PABELLÓN NORTE</text>
 
   <!-- K: recognizable indoor court, with the west-side service wing shown separately. -->
   <g id="anexo_bloque_k" class="building">
@@ -108,131 +158,135 @@ SVG = """<?xml version="1.0" encoding="UTF-8"?>
     <path class="room" d="M84 352H143V406H84Z"/>
   </g>
   <g id="bloque_k" class="building">
-    <rect x="160" y="222" width="330" height="194" rx="12" class="gym"/>
-    <rect x="164" y="224" width="322" height="24" rx="8" fill="#0d315b"/>
+    <rect x="160" y="222" width="236" height="194" rx="12" class="gym"/>
+    <rect x="164" y="224" width="228" height="24" rx="8" fill="#0d315b"/>
     <g id="cancha_gimnasio_k">
-      <rect x="181" y="252" width="288" height="134" rx="4" fill="#1d69b7" stroke="#fff" stroke-width="3"/>
-      <path class="court-mark" d="M325 252V386M181 319H469"/>
-      <circle class="court-mark" cx="325" cy="319" r="25"/>
-      <path class="court-mark" d="M181 287h30v64h-30M469 287h-30v64h30"/>
+      <rect x="181" y="252" width="194" height="134" rx="4" fill="#1d69b7" stroke="#fff" stroke-width="3"/>
+      <path class="court-mark" d="M278 252V386M181 319H375"/>
+      <circle class="court-mark" cx="278" cy="319" r="25"/>
+      <path class="court-mark" d="M181 287h30v64h-30M375 287h-30v64h30"/>
     </g>
-    <rect x="262" y="391" width="126" height="25" rx="8" fill="#0d315b"/>
-    <text class="on-dark" x="325" y="241" text-anchor="middle" font-size="14" font-weight="850">K · GIMNASIO</text>
+    <rect x="215" y="391" width="126" height="25" rx="8" fill="#0d315b"/>
+    <text class="on-dark" x="278" y="241" text-anchor="middle" font-size="14" font-weight="850">K · GIMNASIO</text>
   </g>
 
   <!-- E and the open stage area; the latter is also used as a court. -->
+  <g id="aulas_e_d_c_junto_a_p03" transform="translate(-94 0)">
   <g id="bloque_e" class="building">
-    <rect x="520" y="218" width="104" height="168" rx="10" class="admin"/>
-    <rect x="524" y="222" width="96" height="24" rx="7" fill="#0d4d96"/>
-    <rect class="room" x="530" y="250" width="84" height="50" rx="4"/>
-    <rect class="room-alt" x="530" y="306" width="84" height="74" rx="4"/>
-    <text class="on-dark" x="572" y="239" text-anchor="middle" font-size="13" font-weight="850">E · PABELLÓN</text>
+    <rect x="540" y="218" width="129" height="168" rx="10" class="admin"/>
+    <rect x="544" y="222" width="121" height="24" rx="7" fill="#0d4d96"/>
+    <rect class="room" x="550" y="250" width="109" height="50" rx="4"/>
+    <rect class="room-alt" x="550" y="306" width="109" height="74" rx="4"/>
+    <text class="on-dark" x="604.5" y="239" text-anchor="middle" font-size="13" font-weight="850">E · AULAS</text>
   </g>
   <g id="bloque_d_pabellon" class="building">
-    <rect x="520" y="390" width="104" height="168" rx="10" class="admin"/>
-    <rect x="524" y="394" width="96" height="24" rx="7" fill="#0d4d96"/>
-    <rect class="room" x="530" y="422" width="84" height="50" rx="4"/>
-    <rect class="room-alt" x="530" y="478" width="84" height="74" rx="4"/>
-    <text class="on-dark" x="572" y="411" text-anchor="middle" font-size="13" font-weight="850">D · PABELLÓN</text>
+    <rect x="540" y="390" width="129" height="168" rx="10" class="admin"/>
+    <rect x="544" y="394" width="121" height="24" rx="7" fill="#0d4d96"/>
+    <rect class="room" x="550" y="422" width="109" height="50" rx="4"/>
+    <rect class="room-alt" x="550" y="478" width="109" height="74" rx="4"/>
+    <text class="on-dark" x="604.5" y="411" text-anchor="middle" font-size="13" font-weight="850">D · AULAS</text>
   </g>
   <g id="bloque_c_este" class="building">
-    <rect x="520" y="562" width="104" height="84" rx="10" class="admin"/>
-    <rect x="524" y="566" width="96" height="24" rx="7" fill="#0d4d96"/>
-    <rect class="room-alt" x="530" y="594" width="84" height="46" rx="4"/>
-    <text class="on-dark" x="572" y="583" text-anchor="middle" font-size="13" font-weight="850">C · PABELLÓN</text>
+    <rect x="540" y="562" width="129" height="84" rx="10" class="admin"/>
+    <rect x="544" y="566" width="121" height="24" rx="7" fill="#0d4d96"/>
+    <rect class="room-alt" x="550" y="594" width="109" height="46" rx="4"/>
+    <text class="on-dark" x="604.5" y="583" text-anchor="middle" font-size="13" font-weight="850">C · AULAS</text>
   </g>
-  <g transform="translate(0 -40)">
-  <g id="escenario_cancha_este" aria-label="Escenario, espacio abierto usado como cancha">
-    <rect x="532" y="716" width="180" height="234" fill="#12243a" stroke="#35587d" stroke-width="3"/>
+  </g>
+  <g transform="translate(0 60)">
+  <g id="escenario_cancha_este" transform="translate(-66 0)" aria-label="Escenario, espacio abierto usado como cancha">
+    <rect class="admin building" x="532" y="626" width="180" height="324"/>
+    <g id="cancha_deportiva_interior">
+      <rect x="550" y="637" width="115" height="216" rx="3" style="fill:#1464b5" stroke="#dceeff" stroke-width="2"/>
+      <path d="M550 745H665" stroke="#dceeff" stroke-opacity=".5" stroke-width="1.5"/>
+      <g id="escenario_cancha">
+        <rect x="668" y="693" width="37" height="107" rx="2" style="fill:#8c97a3" stroke="#dceeff" stroke-width="1.5"/>
+        <path d="M668 693V800" stroke="#ff9a3c" stroke-width="3"/>
+      </g>
+    </g>
+    <text class="on-dark" x="607" y="690" text-anchor="middle" font-size="13" font-weight="850">CANCHA</text>
+    <text class="on-dark" x="607" y="706" text-anchor="middle" font-size="13" font-weight="850">DEPORTIVA</text>
     <g id="gimnasio_escenario" aria-label="Gimnasio">
-      <rect x="532" y="876" width="101" height="74" fill="#183452" stroke="#17385f" stroke-width="2"/>
-      <text x="582" y="918" text-anchor="middle" font-size="12" font-weight="850">GIMNASIO</text>
+      <rect class="classroom building" x="532" y="876" width="101" height="52" style="fill:#6b7f95"/>
+      <text class="on-dark" x="582" y="907" text-anchor="middle" font-size="12" font-weight="850">GIMNASIO</text>
     </g>
     <g id="kiosco_escenario" aria-label="Kiosco">
-      <rect x="633" y="876" width="79" height="74" fill="#1a3d66" stroke="#35587d" stroke-width="2"/>
-      <text x="672" y="918" text-anchor="middle" font-size="12" font-weight="850">KIOSCO</text>
+      <rect class="classroom building" x="657" y="876" width="55" height="86" style="fill:#fff"/>
+      <text x="684" y="923" text-anchor="middle" font-size="12" font-weight="850" style="fill:#07111f">KIOSCO</text>
+    </g>
+    <g id="pasillo_gimnasio_kiosco" aria-label="Pasillo hacia el kiosco">
+      <path id="paso_peatonal_10_gimnasio" class="walk" d="M532 928H633V962H532Z"/>
+      <path id="paso_peatonal_11_kiosco" class="walk" d="M633 876H657V962H633Z"/>
     </g>
   </g>
   </g>
 
-  <!-- D and C are two distinct teaching wings; letter markers remain legible at phone scale. -->
-  <g id="bloque_d" class="building">
-    <rect x="386" y="466" width="104" height="88" rx="10" class="classroom"/>
-    <rect x="390" y="470" width="96" height="24" rx="7" fill="#168dff"/>
-    <rect class="room" x="394" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
-      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
-    </rect>
-    <rect class="room-alt" x="442" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
-      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
-    </rect>
-    <text style="fill:#07111f" x="438" y="487" text-anchor="middle" font-size="12" font-weight="850">D · AULAS</text>
-  </g>
-  <g id="bloque_c" class="building">
-    <rect x="386" y="560" width="104" height="88" rx="8" class="classroom"/>
-    <rect x="390" y="564" width="96" height="24" rx="6" fill="#168dff"/>
-    <rect class="room" x="394" y="594" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
-      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
-    </rect>
-    <rect class="room-alt" x="442" y="594" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
-      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
-    </rect>
-    <text style="fill:#07111f" x="438" y="581" text-anchor="middle" font-size="12" font-weight="850">C · AULAS</text>
-  </g>
-
-  <!-- B is the central teaching / administration wing. -->
+  <g id="bloques_b_c_d_junto_a_j" transform="translate(-36 0)">
+    <!-- B is the central teaching / administration wing. -->
   <g id="bloque_b" class="building">
-    <rect x="184" y="466" width="198" height="182" rx="10" class="classroom"/>
-    <rect x="190" y="470" width="186" height="24" rx="7" fill="#168dff"/>
-    <rect class="room" x="194" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+    <rect x="110" y="466" width="316" height="182" rx="10" class="classroom"/>
+    <rect x="116" y="470" width="304" height="24" rx="7" fill="#168dff"/>
+    <rect class="room" x="120" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
       <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
     </rect>
-    <rect class="room-alt" x="246" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+    <rect class="room-alt" x="172" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
       <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
     </rect>
-    <rect class="room" x="298" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+    <rect class="room" x="224" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
       <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
     </rect>
-    <rect class="room-alt" x="194" y="570" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+    <rect class="room-alt" x="276" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
       <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
     </rect>
-    <rect class="room" x="246" y="570" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+    <rect class="room" x="328" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
       <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
     </rect>
-    <rect class="room-alt" x="298" y="570" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+    <rect class="room-alt" x="380" y="500" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
       <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
     </rect>
-    <text style="fill:#07111f" x="283" y="487" text-anchor="middle" font-size="12" font-weight="850">B · AULAS / ADMIN.</text>
+    <rect class="room-alt" x="120" y="570" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
+    </rect>
+    <rect class="room" x="172" y="570" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
+    </rect>
+    <rect class="room-alt" x="224" y="570" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
+    </rect>
+    <rect class="room" x="276" y="570" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
+    </rect>
+    <rect class="room-alt" x="328" y="570" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
+    </rect>
+    <rect class="room" x="380" y="570" width="44" height="44" rx="4" data-area-util="49.70 m2" data-area-ejes="51.84 m2" data-medida-ejes="7.2 x 7.2 m">
+      <title>Aula tipo del plano: 49,70 m2 útiles; 51,84 m2 por ejes (7,2 x 7,2 m nominales).</title>
+    </rect>
+    <text style="fill:#07111f" x="268" y="487" text-anchor="middle" font-size="12" font-weight="850">B · AULAS / ADMIN.</text>
+  </g>
   </g>
 
   <!-- West-side J, I and F are shown as long, separate wings as on the plan. -->
-  <g id="bloque_j" class="building">
-    <rect x="74" y="452" width="74" height="186" rx="10" class="admin"/>
-    <path class="room" d="M83 460.2H139V498.7H83Z"/>
-    <path class="room-alt" d="M83 503.6H139V543.2H83Z"/>
-    <path class="room" d="M83 548.2H139V587.7H83Z"/>
-    <path class="room-alt" d="M83 592.6H139V628.8H83Z"/>
-    <rect x="90" y="519.8" width="42" height="52" rx="12" fill="#0d4d96"/>
-    <text class="block-letter" x="111" y="554.9" text-anchor="middle">J</text>
+  <g transform="translate(0 60)">
+  <g id="bloque_i" class="building" transform="translate(-40 0)">
+    <rect x="74" y="652" width="74" height="179" rx="10" fill="#168dff"/>
+    <path class="room" d="M83 661H139V738.5H83Z"/>
+    <path class="room-alt" d="M83 744.5H139V822H83Z"/>
+    <rect x="90" y="716" width="42" height="50" rx="12" fill="#168dff"/>
+    <text class="block-letter" x="111" y="751" text-anchor="middle">I</text>
   </g>
-  <g transform="translate(0 -40)">
-  <g id="bloque_i" class="building">
-    <rect x="74" y="732" width="74" height="99" rx="10" fill="#168dff"/>
-    <path class="room" d="M83 741H139V777H83Z"/>
-    <path class="room-alt" d="M83 783H139V822H83Z"/>
-    <rect x="90" y="755" width="42" height="50" rx="12" fill="#168dff"/>
-    <text class="block-letter" x="111" y="790" text-anchor="middle">I</text>
-  </g>
-  <g id="bloque_f" class="building">
+  <g id="bloque_f" class="building" transform="translate(-40 0)">
     <rect x="74" y="842" width="74" height="98" rx="10" fill="#168dff"/>
     <path class="room" d="M83 851H139V886H83Z"/>
     <path class="room-alt" d="M83 892H139V931H83Z"/>
     <rect x="90" y="867" width="42" height="50" rx="12" fill="#168dff"/>
     <text class="block-letter" x="111" y="902" text-anchor="middle">F</text>
+    <text class="on-dark" x="122" y="949" text-anchor="middle" font-size="9" font-weight="850">F · DEPENDENCIAS</text>
   </g>
   </g>
 
   <!-- Eastern outdoor court shown in the architectural plan; not a multicancha. -->
-  <g id="patio_deportivo_este">
+  <g id="patio_deportivo_este" transform="translate(-5 0)">
     <rect x="628" y="295" width="159" height="263" rx="12" fill="#087bff" stroke="#24486d" stroke-width="4"/>
     <rect class="court-mark" x="641" y="309" width="133" height="226"/>
     <path class="court-mark" d="M641 422H774"/>
@@ -240,13 +294,16 @@ SVG = """<?xml version="1.0" encoding="UTF-8"?>
     <rect x="637.5" y="502" width="140" height="28" rx="7" fill="#0754ad"/>
     <text class="on-dark" x="707.5" y="521" text-anchor="middle" font-size="13" font-weight="850">CANCHA</text>
   </g>
-  <g id="aulas_g_provisional" class="building">
+  <g id="bloque_q640" class="building">
+    <rect x="600" y="580" width="40" height="80" rx="6" class="classroom"/>
+  </g>
+  <g id="aulas_g_provisional" class="building" transform="translate(-5 0)">
     <rect x="628" y="218" width="159" height="73" rx="10" class="classroom"/>
-    <text style="fill:#07111f" x="707.5" y="259" text-anchor="middle" font-size="14" font-weight="850">AULAS G</text>
+    <text style="fill:#07111f" x="707.5" y="259" text-anchor="middle" font-size="14" font-weight="850">AULAS A32–A33</text>
   </g>
 
   <!-- Provisional southern volumes sit directly behind the dining room; internal room layouts remain unconfirmed. -->
-  <g transform="translate(0 -40)">
+  <g transform="translate(0 60)">
   <g id="edificio_acceso_sur" class="building">
     <path d="M210 945H550V1068H210Z" fill="#15385c"/>
     <g id="comedor_acceso_loa" transform="translate(74.4 292) scale(0.8 0.7)">
@@ -257,74 +314,104 @@ SVG = """<?xml version="1.0" encoding="UTF-8"?>
       <rect x="214" y="950" width="156" height="112" rx="6" fill="#168dff" stroke="#24486d" stroke-width="3"/>
       <rect x="222" y="958" width="140" height="44" rx="4" fill="#eaf3ff" stroke="#6685a7" stroke-width="2"/>
       <rect x="222" y="1009" width="140" height="44" rx="4" fill="#fff" stroke="#6685a7" stroke-width="2"/>
-      <text x="292" y="985" text-anchor="middle" font-size="12" font-weight="850" style="fill:#07111f">AULAS · 1° PISO</text>
-      <text x="292" y="1036" text-anchor="middle" font-size="12" font-weight="850" style="fill:#07111f">AULAS · 2° PISO</text>
+      <text x="292" y="985" text-anchor="middle" font-size="12" font-weight="850" style="fill:#07111f">SECTOR SUR</text>
     </g>
     <g id="aulas_tras_comedor_derecha_provisional" aria-label="Estructura de aulas de dos pisos; distribución pendiente">
       <rect x="374" y="950" width="176" height="112" rx="6" fill="#168dff" stroke="#24486d" stroke-width="3"/>
       <rect x="382" y="958" width="160" height="44" rx="4" fill="#eaf3ff" stroke="#6685a7" stroke-width="2"/>
       <rect x="382" y="1009" width="160" height="44" rx="4" fill="#fff" stroke="#6685a7" stroke-width="2"/>
-      <text x="462" y="985" text-anchor="middle" font-size="12" font-weight="850" style="fill:#07111f">AULAS · 1° PISO</text>
-      <text x="462" y="1036" text-anchor="middle" font-size="12" font-weight="850" style="fill:#07111f">AULAS · 2° PISO</text>
+      <text x="462" y="985" text-anchor="middle" font-size="12" font-weight="850" style="fill:#07111f">SECTOR SUR</text>
     </g>
   </g>
 
   <!-- Portería and the public entrance align with Avenida Loa. -->
   <g id="bloque_h" class="building">
-    <g id="sector_utp_provisional">
-      <rect x="48" y="952" width="72" height="120" rx="8" fill="#17385f"/>
-      <rect x="56" y="960" width="56" height="104" rx="5" fill="#3c8dff"/>
-      <text style="fill:#07111f" x="84" y="1016" text-anchor="middle" font-size="11" font-weight="850">UTP</text>
+    <g id="sector_utp_provisional" aria-label="Bloque J, antes UTP">
+      <path d="M-4 652H30V952H120V1100H-4Z" fill="#17385f" stroke="#24486d" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M4 660H22V960H112V1092H4Z" fill="#3c8dff" stroke="#3c8dff" stroke-width="8" stroke-linejoin="round"/>
+      <text style="fill:#07111f" x="58" y="1024" text-anchor="middle" font-size="20" font-weight="900">J</text>
     </g>
-    <g id="sector_porteria">
-      <rect x="128" y="952" width="62" height="120" rx="8" fill="#17385f"/>
-      <rect x="136" y="960" width="46" height="104" rx="5" fill="#eaf3ff"/>
-      <text x="159" y="1008" text-anchor="middle" font-size="8" font-weight="850" style="fill:#07111f">PORTERÍA</text>
-      <text x="159" y="1024" text-anchor="middle" font-size="10" font-weight="850" style="fill:#07111f">H</text>
+    <g id="sector_porteria" transform="translate(0 100)">
+      <rect x="128" y="952" width="72" height="60" rx="8" fill="#17385f"/>
+      <rect x="136" y="960" width="56" height="44" rx="5" fill="#eaf3ff"/>
+      <text x="164" y="978" text-anchor="middle" font-size="8" font-weight="850" style="fill:#07111f">PORTERÍA</text>
+      <text x="164" y="994" text-anchor="middle" font-size="10" font-weight="850" style="fill:#07111f">H</text>
+    </g>
+    <g id="sector_inspectoria" aria-label="Inspectoría">
+      <rect x="204" y="1068" width="72" height="44" rx="8" fill="#17385f"/>
+      <rect x="212" y="1076" width="56" height="28" rx="5" fill="#eaf3ff"/>
+      <text x="240" y="1094" text-anchor="middle" font-size="8" font-weight="850" style="fill:#07111f">INSPECTORÍA</text>
     </g>
   </g>
   <g id="zona_estacionamiento">
-    <rect x="554" y="950" width="158" height="122" rx="8" fill="#142a45" stroke="#35587d" stroke-width="3"/>
-    <path d="M566 978H700M566 1008H700M566 1038H700M594 952V1070M628 952V1070M662 952V1070M696 952V1070" stroke="#35587d" stroke-width="2"/>
-    <rect x="586" y="954" width="94" height="20" rx="7" fill="#17385f"/>
-    <text class="on-dark" x="633" y="969" text-anchor="middle" font-size="12" font-weight="850">PARKING</text>
+    <path d="M2 1112H556V962H628A8 8 0 0 1 636 970V1168A8 8 0 0 1 628 1176H2A8 8 0 0 1 -6 1168V1120A8 8 0 0 1 2 1112Z" fill="#142a45" stroke="#35587d" stroke-width="3"/>
+    <path d="M34 1112V1176M70 1112V1176M106 1112V1176M142 1112V1176M178 1112V1176M214 1112V1176M250 1112V1176M286 1112V1176M322 1112V1176M358 1112V1176M394 1112V1176M430 1112V1176M466 1112V1176M502 1112V1176M538 1112V1176M574 1112V1176M610 1112V1176M580 962V1112M608 962V1112" stroke="#35587d" stroke-width="2"/>
+    <rect x="260" y="1117" width="140" height="22" rx="7" fill="#17385f"/>
+    <text class="on-dark" x="330" y="1133" text-anchor="middle" font-size="11" font-weight="850">ESTACIONAMIENTO</text>
+  </g>
+  <g id="camino_entrada_peatonal" aria-label="Camino de la entrada peatonal">
+    <rect x="124" y="1112" width="72" height="68" fill="#eaf3ff"/>
+  </g>
+  <g id="reja_estacionamiento" aria-label="Malla">
+    <rect x="276" y="1108" width="280" height="8" fill="url(#malla_reja)" stroke="#dceeff" stroke-width="1.5"/>
+    <g id="porton" aria-label="Portón">
+      <rect x="556" y="1100" width="84" height="24" rx="4" fill="#0e2038" stroke="#dceeff" stroke-width="3"/>
+      <path d="M598 1100V1124" fill="none" stroke="#dceeff" stroke-width="2" stroke-linecap="round"/>
+      <rect x="578" y="1086" width="40" height="12" rx="4" fill="#17385f"/>
+      <text class="on-dark" x="598" y="1095" text-anchor="middle" font-size="8" font-weight="850">PORTÓN</text>
+    </g>
   </g>
 
+  <g id="pasto_arbustos_sector_sur" aria-label="Pasto y arbustos sobre el sector sur">
+    <rect x="220" y="926" width="60" height="16" rx="4" fill="#2f7d4f" opacity=".85"/>
+    <g fill="#1d5c38" stroke="#0f3a22" stroke-width=".8">
+      <circle cx="232" cy="934" r="4.2"/>
+      <circle cx="250" cy="933" r="3.6"/>
+      <circle cx="268" cy="934.5" r="4.2"/>
+    </g>
+    <g fill="#4fae6f">
+      <circle cx="231" cy="933" r="1.4"/>
+      <circle cx="249" cy="932" r="1.2"/>
+      <circle cx="267" cy="933.5" r="1.4"/>
+    </g>
+  </g>
+  <g id="pasto_arbustos_junto_p08" aria-label="Pasto y arbustos junto a P08">
+    <rect x="120" y="980" width="26" height="61" rx="4" fill="#2f7d4f" opacity=".85"/>
+    <g fill="#1d5c38" stroke="#0f3a22" stroke-width=".8"><circle cx="130" cy="996" r="4.6"/><circle cx="136" cy="1014" r="4.6"/><circle cx="131" cy="1032" r="4.6"/></g>
+    <g fill="#4fae6f"><circle cx="129" cy="994.5" r="1.5"/><circle cx="135" cy="1012.5" r="1.5"/><circle cx="130" cy="1030.5" r="1.5"/></g>
+  </g>
+  </g>
+  <g transform="translate(0 10)">
   <g id="avenida_loa">
-    <rect class="road" x="30" y="1230" width="820" height="72" rx="14"/>
+    <rect class="road" x="-10" y="1230" width="860" height="56" rx="14"/>
     <text class="road-label" x="380" y="1274" text-anchor="middle">AVENIDA LOA · ACCESO PRINCIPAL</text>
   </g>
   <g id="acceso_peatonal_loa">
-    <path d="M372 1230V1098" class="path-line"/>
-    <path d="M372 1230V1098" class="route-line" marker-end="url(#arrow)"/>
-    <circle class="node" cx="372" cy="1225" r="9"/>
-    <rect x="290" y="1240" width="164" height="20" rx="8" fill="#168dff"/>
-    <text style="fill:#07111f" x="372" y="1255" text-anchor="middle" font-size="12" font-weight="850">ENTRADA PEATONAL</text>
+    <path d="M160 1228V1192" fill="none" stroke="#168dff" stroke-width="12"/>
+    <path d="M160 1168L178 1194H142Z" fill="#168dff"/>
+    <rect x="78" y="1240" width="164" height="20" rx="8" fill="#168dff"/>
+    <text style="fill:#07111f" x="160" y="1255" text-anchor="middle" font-size="12" font-weight="850">ENTRADA PEATONAL</text>
   </g>
+  </g>
+
+  <g id="paso_peatonal_03_resaltado">
+    <path class="walk" d="M400 205H426V660H400Z"/>
   </g>
 
   <g id="identificadores_pasos" aria-label="Identificadores de pasos">
     <g aria-label="Paso 01, paso horizontal norte">
-      <rect class="step-marker" x="746" y="187" width="48" height="24" rx="9"/>
-      <text class="step-label" x="770" y="204">P01</text>
+      <rect class="step-marker" x="706" y="187" width="48" height="24" rx="9"/>
+      <text class="step-label" x="730" y="204">P01</text>
     </g>
     <g aria-label="Paso 02, paso horizontal superior">
-      <rect class="step-marker" x="466" y="426" width="48" height="24" rx="9"/>
-      <text class="step-label" x="490" y="443">P02</text>
+      <rect class="step-marker" x="372" y="426" width="48" height="24" rx="9"/>
+      <text class="step-label" x="396" y="443">P02</text>
     </g>
     <g aria-label="Paso 03, paso longitudinal este">
-      <rect class="step-marker" x="494" y="590" width="48" height="24" rx="9"/>
-      <text class="step-label" x="518" y="607">P03</text>
+      <rect class="step-marker" x="400" y="590" width="48" height="24" rx="9"/>
+      <text class="step-label" x="424" y="607">P03</text>
     </g>
-    <g aria-label="Paso 04, paso horizontal sur">
-      <rect class="step-marker" x="160" y="1033" width="48" height="24" rx="9"/>
-      <text class="step-label" x="184" y="1050">P04</text>
-    </g>
-    <g aria-label="Paso 05, paso longitudinal oeste">
-      <rect class="step-marker" x="151" y="393" width="48" height="24" rx="9"/>
-      <text class="step-label" x="175" y="410">P05</text>
-    </g>
-    <g aria-label="Paso 06, fila del comedor">
+    <g aria-label="Paso 06, fila del comedor" transform="translate(-14 100)">
       <rect x="389" y="688" width="112" height="38" rx="9" fill="#0a84ff" stroke="#a6d5ff" stroke-width="3"/>
       <text x="445" y="704" text-anchor="middle" font-size="9" font-weight="900" style="fill:#07111f">P06 · FILA DEL</text>
       <text x="445" y="718" text-anchor="middle" font-size="10" font-weight="900" style="fill:#07111f">COMEDOR</text>
@@ -333,15 +420,16 @@ SVG = """<?xml version="1.0" encoding="UTF-8"?>
       <rect class="step-marker" x="206" y="651" width="48" height="24" rx="9"/>
       <text class="step-label" x="230" y="668">P07</text>
     </g>
-    <g aria-label="Paso 08, pasillo a la derecha de Portería que conecta P07 con P04">
+    <g aria-label="Paso 08, pasillo a la derecha de Portería que conecta P07 con el sur" transform="translate(0 100)">
       <rect class="step-marker" x="138" y="818" width="48" height="24" rx="9"/>
       <text class="step-label" x="162" y="835">P08</text>
     </g>
   </g>
 
-  <g transform="translate(0 -40)">
+  </g>
+  <g transform="translate(0 -10)">
   <g id="leyenda">
-    <rect x="30" y="1312" width="820" height="1" fill="#35587d"/>
+    <rect x="30" y="1312" width="860" height="1" fill="#35587d"/>
     <circle cx="74" cy="1332" r="9" fill="#168dff"/>
     <text x="91" y="1338" font-size="14" font-weight="700">Aulas</text>
     <circle cx="181" cy="1332" r="9" fill="#0a84ff"/>
@@ -355,8 +443,8 @@ SVG = """<?xml version="1.0" encoding="UTF-8"?>
   </g>
   </g>
   <g id="cuadricula_temporal_mapa" pointer-events="none" aria-label="Cuadrícula temporal de 20 unidades, coordenadas cada 40">
-    <rect width="880" height="1320" fill="url(#map_grid_minor)"/>
-    <rect width="880" height="1320" fill="url(#map_grid_major)"/>
+    <rect width="920" height="1350" fill="url(#map_grid_minor)"/>
+    <rect width="920" height="1350" fill="url(#map_grid_major)"/>
   </g>
   __MAP_GRID_COORDINATES__
 </svg>
@@ -370,9 +458,9 @@ def spreadsheet_row(index: int) -> str:
     return label
 
 grid_coordinates = ['<g id="coordenadas_temporales_mapa" fill="#fff" stroke="#07111f" stroke-width="2.5" paint-order="stroke" font-size="9" font-weight="900">']
-for x in range(0, 880, 40):
+for x in range(0, 920, 40):
     grid_coordinates.append(f'    <text x="{x + 2}" y="95">{x}</text>')
-for row, y in enumerate(range(0, 1320, 40), start=1):
+for row, y in enumerate(range(0, 1350, 40), start=1):
     grid_coordinates.append(f'    <text x="4" y="{y + 13}">{spreadsheet_row(row)}</text>')
 grid_coordinates.append("  </g>")
 SVG = SVG.replace("__MAP_GRID_COORDINATES__", "\n  ".join(grid_coordinates))
