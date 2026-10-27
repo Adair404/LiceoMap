@@ -13,7 +13,6 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.liceomap.app.BuildConfig
-import com.liceomap.app.data.demo.DemoData
 import com.liceomap.app.data.repository.ThemePreferences
 import com.liceomap.app.ui.announcements.*
 import com.liceomap.app.ui.content.*
@@ -24,7 +23,6 @@ import com.liceomap.app.ui.profile.ProfileScreen
 import com.liceomap.app.ui.schedule.ScheduleScreen
 import com.liceomap.app.ui.theme.LiceoMapTheme
 import com.liceomap.app.model.SchoolSession
-import com.liceomap.app.ui.components.StatusCard
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -81,8 +79,7 @@ fun AppNavigation(appViewModel: AppViewModel = viewModel(), contentViewModel: Sc
                         when (state.destination) {
                             AppDestination.HOME -> HomeScreen(session, content, nowMillis,
                                 appViewModel::selectDestination, appViewModel::openAnnouncement, retry)
-                            AppDestination.MAP -> if (session.isDemo) MapScreen(DemoData.map, state.selectedRoom)
-                                else StatusCard("Mapa en desarrollo", "La orientación de salas estará disponible en una próxima versión.")
+                            AppDestination.MAP -> MapScreen(state.selectedRoom)
                             AppDestination.SCHEDULE -> ScheduleScreen(session.course, content.schedule,
                                 state.selectedDay, nowMillis, appViewModel::selectDay, appViewModel::openRoom, retry, session.isDemo)
                             AppDestination.ANNOUNCEMENTS -> {
